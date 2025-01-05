@@ -479,7 +479,7 @@ class DataBaseController(
         val userChanged = session.get(User::class.java, user.id)
         userChanged.role = roleNew
         userChanged.nickName = nicknameNew
-        userChanged.password = passwordNew
+        userChanged.password = createPassword(passwordNew)
         userChanged.about = aboutNew
         session.transaction.commit()
     }

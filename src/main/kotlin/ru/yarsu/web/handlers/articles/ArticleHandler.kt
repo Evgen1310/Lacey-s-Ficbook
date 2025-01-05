@@ -10,6 +10,7 @@ import org.http4k.lens.int
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
 import ru.yarsu.db.DataBaseController
 import ru.yarsu.web.domain.Paginator
+import ru.yarsu.web.domain.article.Chapter
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.funs.lensOrNull
 import ru.yarsu.web.models.ArticleVM
@@ -29,7 +30,8 @@ class ArticleHandler(
             ?.let { id -> dataBaseController.getArticleById(id) }
             ?.let { entity ->
                 val page = lensOrDefault(pageLens, request, 0).takeIf { it > -1 } ?: 0
-                val chapter = dataBaseController.getChaptersByIds(entity.chapters)[page]
+                val chapters = dataBaseController.getChaptersByIds(entity.chapters)
+                val chapter = if (chapters.isEmpty()) Chapter(chapter = 0, name = "На данный момент глав нет", content = "") else chapters[page]
                 val paginator = Paginator(page, entity.chapters.size, request.uri.removeQueries("page"))
                 return Response(OK).with(
                     htmlView(request) of

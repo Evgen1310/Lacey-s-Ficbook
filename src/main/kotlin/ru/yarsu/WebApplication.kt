@@ -31,7 +31,7 @@ fun main() {
 
     val dataBaseController = DataBaseController(authSalt = dbConfig.authSalt)
 
-    val jwtTools = JwtTools(dbConfig.jwtSalt, "ru.yarsu", 7)
+    val jwtTools = JwtTools(dbConfig.jwtSecret, "ru.yarsu", 7)
 
     val renderer = rendererProvider(true)
     val logger = LoggerFactory.getLogger("ru.yarsu.WebApplication")

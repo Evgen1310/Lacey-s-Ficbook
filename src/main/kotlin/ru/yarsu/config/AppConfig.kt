@@ -1,6 +1,6 @@
 package ru.yarsu.config
 
-import org.http4k.cloudnative.env.Environment
+import org.http4k.config.Environment
 import java.io.File
 
 class AppConfig(
@@ -9,10 +9,18 @@ class AppConfig(
 )
 
 private fun getAppEnv(config: Config): Environment {
-    return Environment.from(File("data/app.properties")) overrides
-        Environment.JVM_PROPERTIES overrides
-        Environment.ENV overrides
-        config.defaultEnv
+    val file = File("config/app.properties")
+    return if (file.exists()) {
+        Environment.from(File("config/app.properties")) overrides
+            Environment.JVM_PROPERTIES overrides
+            Environment.ENV overrides
+            config.defaultEnv
+    } else {
+        Environment.fromResource("app.properties") overrides
+            Environment.JVM_PROPERTIES overrides
+            Environment.ENV overrides
+            config.defaultEnv
+    }
 }
 
 fun readConfigurations(): AppConfig {

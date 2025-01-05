@@ -41,12 +41,14 @@
         Удаление
     </a>
 {% endif %}
+{% if model.article.article.chapters is not empty %}
 <div class="row row-col-1 row-cols-md-1 mx-auto fw-light py-3">
         <h5><u>Глава {{ model.chapter.chapter }}. {{ model.chapter.name }}.</u></h5>
         {% for str in model.chapter.contentList() %}
             <p>{{ str }}</p>
         {% endfor %}
 </div>
+{% endif %}
 <div class="row row-col-1 row-cols-md-1 border-top border-bottom border-dark mx-auto bg-dop ">
     <h4>Оглавление</h4>
     {% if model.article.article.chapters is empty %}
