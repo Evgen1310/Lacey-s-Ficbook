@@ -1,0 +1,46 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.FormEditVM" #}
+    {% extends "./partials/Layout.peb" %}
+{% block content %}
+<div class="row">
+{#    <img class="w-100 mx-auto" src="/images/neighbor.png" alt="">#}
+</div>
+<div class="row mx-auto text-left">
+    <div class="col text-left">
+{#        <img class="w-100" src="/images/left.png" alt="">#}
+    </div>
+    <div class="col-md-5 g-4 px-5 bg-space-dop h-25 border border-dark border-3 g-4">
+        <div class="row text-center my-2">
+            <div class="col">
+                <div class="h1">Готовим {{ model.formArt }}</div>
+            </div>
+        </div>
+        <div class="col ">
+            <div class="row border border-bottom-0 border-dark border-3 mx-4 text-center">
+                <p class="text-black h6">{{ model.errorStr }}</p>
+            </div>
+            <div class="row border-top border-dark border-3">
+            </div>
+            <form method="POST">
+                <div class="row row-col-1 row-cols-md-1 g-2 py-3 text-center">
+                    <div class="col">
+                        <label for="newForm">Новое:</label>
+                        <input type="text" id="newForm" name="newForm"
+                            {% if model.errors contains "newForm" or model.errors contains "formExist" %}
+                               class="border border-3 border-danger"
+                            {% endif %}
+                               value="{{ model.form.fields["newForm"] | first}}">
+                    </div>
+                </div>
+                <div class="row py-3 border-top border-dark border-3">
+                    <button type="submit" class="btn mybutton">Отправить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col">
+{#        <img class="w-100 mx-auto" src="/images/right.png" alt="">#}
+    </div>
+</div>
+
+{% endblock %}
+

@@ -1,0 +1,98 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.ArticleVM" #}
+    {% extends "./partials/Layout.peb" %}
+{% block content %}
+<div class="row py-4 text-center">
+    <div class="col">
+        <div class="h1"><u>{{ model.article.article.nameArt }}</u></div>
+    </div>
+</div>
+<div class="row row-col-1 row-cols-md-1 border-top border-bottom border-dark mx-auto fw-light bg-dop">
+    <div class="col"><p title="{{ model.article.article.user }}">Автор: {{ model.article.userNick }}</p></div>
+    <div class="col"><p>Об авторе:
+        {% if model.article.userAbout == "" %}
+            сказать не о чем
+        {% endif %}
+        {{ model.article.userAbout | lower}}</p></div>
+    <div class="col"><p>Возрастной рейтинг: {{ model.article.article.gAge() }}</p></div>
+    <div class="col"><p>Форма: {{ model.article.formStr | lower }}</p></div>
+    <div class="col"><p>Жанр: {{ model.article.genreStr | lower}}</p></div>
+    <div class="col">
+        <p>Теги:
+            {% if model.article.article.tagsArt is empty %}
+                отсутствуют
+            {% endif %}
+            {{ model.tags | join(", ")}}
+        </p>
+    </div>
+</div>
+{% if permissions.manageAllArticles or model.article.editArticle %}
+    <a class="icon-link btn mybutton card-link my-2" href="{{ model.article.article.id }}/edit">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+             class="bi bi-pencil">
+            <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+        </svg>
+        Редактирование
+    </a>
+    <a class="icon-link btn mybutton mx-3" href="{{ model.article.article.id }}/delete">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+             class="bi bi-pencil">
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+        </svg>
+        Удаление
+    </a>
+{% endif %}
+<div class="row row-col-1 row-cols-md-1 mx-auto fw-light py-3">
+        <h5><u>Глава {{ model.chapter.chapter }}. {{ model.chapter.name }}.</u></h5>
+        {% for str in model.chapter.contentList() %}
+            <p>{{ str }}</p>
+        {% endfor %}
+</div>
+<div class="row row-col-1 row-cols-md-1 border-top border-bottom border-dark mx-auto bg-dop ">
+    <h4>Оглавление</h4>
+    {% if model.article.article.chapters is empty %}
+        <p>В настоящий момент глав нет</p>
+    {% endif %}
+    {% for chp in model.chapters %}
+        <a href="{{ model.article.article.id }}?page={{ loop.index }}">Глава {{ chp.chapter }}. {{ chp.name }}</a>
+    {% endfor %}
+</div>
+<footer>
+    <div class="row py-2 fw-light">
+        <p>Дата добавления: {{ model.article.article.dateAdd | date("dd-MM-yyyy") }}</p>
+    </div>
+    <footer>
+    <div class="container bg-navmain">
+        <div class="medium-8 cell">
+            <nav>
+                <ul class="pagination pagination-lg justify-content-center">
+                    {% if not (model.paginator.getNearStart()) %}
+                        <li class="page-item"><a class="page-link text-nice" href="{{ model.paginator.uri }}">1</a></li>
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+    {% for i in model.paginator.listPrevPage() %}
+                        <li class="page-item"><a class="page-link text-nice" href="{{ i.value }}">{{i.key + 1}}</a></li>
+                    {% endfor %}
+                    <li class="page-item disabled">
+                        <span class="page-link">{{ model.paginator.getStartPage() + 1 }}</span>
+                    </li>
+                    {% for i in model.paginator.listNextPage() %}
+                        <li class="page-item"><a class="page-link text-nice" href="{{ i.value }}">{{i.key + 1}}</a></li>
+                    {% endfor %}
+    {% if not (model.paginator.getNearEnd()) %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        <li class="page-item"><a class="page-link text-nice"
+                                                 href="{{ model.paginator.getUri(model.paginator.getAllPages()) }}">{{ model.paginator.getAllPages() }}</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</footer>
+</footer>
+{% endblock %}
+

@@ -1,0 +1,207 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.ArticleEditVM" #}
+    {% extends "./partials/Layout.peb" %}
+{% block content %}
+<div class="row py-4 text-center">
+    <div class="col">
+        <div class="h1"><u>Мой маленький конструктор {{ model.articleName }}</u></div>
+    </div>
+</div>
+<form method="POST">
+    <div class="row mx-auto">
+        <div class="col my-3">
+            <div class="row py-2 border-top border-2 border-dark text-left">
+                <div class="col">
+                    <div class="row row-col-1 row-cols-md-1 border-dark g-1 py-3 mx-auto bg-dop">
+                        <div class="col">
+                            <label for="name" class="h5">Название:</label>
+                            <input type="text" id="name" name="name"
+                                {% if model.errors contains "name" %}
+                                   class="border border-3 border-danger"
+                                {% endif %}
+                                   value="{{ model.form.fields["name"] | first}}">
+                        </div>
+                        <div class="col">
+                            <label for="feedback" class="form-label">Аннотация:</label>
+                            <div class="row mx-2">
+                            <textarea id="feedback" name="annotation"
+                                {% if model.errors contains "annotation" %}
+                                      class="border border-3 border-danger"
+                                {% endif %}
+                                      rows="3">{{ model.form.fields["annotation"] | first }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row row-col-1 row-cols-md-1 border-dark g-1 py-3 mx-auto border-top border-bottom border-dark bg-dop">
+                        <div class="col">
+                            <label for="age">Возрастной рейтинг:</label>
+                            <select id="age" name="age"
+                                {% if model.errors contains "age" %}
+                                    class="border border-3 border-danger"
+                                {% endif %}
+                            >
+                                <option disabled {% if model.params.age == -1 %}selected{% endif %}>Не выбрано</option>
+                                {% for age in model.ages %}
+                                    <option
+                                        {% if model.params.age == age.id %}
+                                                selected
+                                        {% endif %}
+                                                value="{{ age.id }}">{{ age.value }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label for="formArt">Форма:</label>
+                            <select id="formArt" name="formArt"
+                                {% if model.errors contains "formArt" %}
+                                    class="border border-3 border-danger"
+                                {% endif %}
+                            >
+                                <option disabled {% if model.params.form == -1 %}selected{% endif %}>Не выбрано</option>
+                                {% for form in model.forms %}
+                                    {% if form.id != -1 %}
+                                        <option
+                                                {% if model.params.form == form.id %}selected{% endif %}
+                                                value="{{ form.id }}">{{ form.form }}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                            <label for="genre">Жанр:</label>
+                            <select id="genre" name="genre"
+                                {% if model.errors contains "genre" %}
+                                    class="border border-3 border-danger"
+                                {% endif %}
+                            >
+                                <option disabled {% if model.params.genre == -1 %}selected{% endif %}>Не выбрано
+                                </option>
+                                {% for genre in model.genres %}
+                                    {% if genre.id != -1 %}
+                                        <option
+                                                {% if model.params.genre == genre.id %}selected{% endif %}
+                                                value="{{ genre.id }}">{{ genre.genre }}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row row-col-1 row-cols-md-1 border-dark g-1 py-1 mx-auto border-top border-bottom border-dark bg-dop">
+                <div class="col py-2">
+                    <label for="tags" class="h5">Теги:</label>
+                    {% for tag in model.form.fields["tagsOld"] %}
+                        <input type="text" id="tags" name="tagsOld"
+                            {% if model.errors contains "tagsOld" %}
+                               class="border border-3 border-danger"
+                            {% endif %}
+                               value="{{ tag }}">
+                    {% endfor %}
+                    <input type="text" id="tags" name="tagsNew"
+                        {% if model.errors contains "tagsNew" %}
+                           class="border border-3 border-danger"
+                        {% endif %}
+                           value="{{ model.form.fields["tagsNew"] | first}}">
+                </div>
+            </div>
+            <div class="row">
+                <p></p>
+            </div>
+        </div>
+        <div class="col-sm-4 justify-content-md-center text-center mx-5 my-4">
+            <div class="row bg-dop text-black">
+                    {% if model.errors contains "delChp" %}
+                    <h4>Ошибка в параметрах</h4>
+                    {% endif %}
+            </div>
+            <div class="row">
+                <p></p>
+                <img class="w-100" src="/images/player.jpg" alt="">
+            </div>
+            <div class="row py-3">
+                <button type="submit" class="btn mybutton-form">Отправить</button>
+            </div>
+        </div>
+    </div>
+    <div class="h5 mx-auto bg-dop">Главы:</div>
+    <div class="row row-col-2 row-cols-md-2 g-1 mx-1 bg-chapters border-top border-bottom border-dark border-2">
+        {% for i in model.form.fields["chaptersOld"] %}
+            <div class="col
+            {% if not loop.last%}
+                border-bottom border-dark
+            {% endif %}
+             py-3">
+                <div class="row">
+                    <div class="col">
+                        <label for="chaptersOld{{ loop.index }}">Глава:</label>
+                        <input type="number" id="chaptersOld{{ loop.index }}" name="chaptersOld" min="0"
+                            {% if model.errors contains "chaptersOld" %}
+                               class="border border-3 border-danger"
+                            {% endif %}
+                               value="{{ model.form.fields["chaptersOld"][loop.index]}}">
+                    </div>
+                    <div class="col">
+                        <label for="namesOld{{ "" + loop.index }}">Название:</label>
+                        <input type="text" id="namesOld{{ "" + loop.index }}" name="namesOld"
+                            {% if model.errors contains "namesOld" %}
+                               class="border border-3 border-danger"
+                            {% endif %}
+                               value="{{ model.form.fields["namesOld"][loop.index] }}">
+                    </div>
+                    <div class="col">
+                        <input type="checkbox"
+                               name="delChp"
+                               id="delChp{{ "" + loop.index }}" value="{{ "" + loop.index }}"/>
+                        <label for="delChp{{ "" + loop.index }}">Удалить</label>
+                    </div>
+                </div>
+                <label for="feedback{{"" + loop.index }}" class="form-label">Текст главы:</label>
+                <div class="row mx-2 {% if model.errors contains "textsOld" %}
+                               border border-3 border-danger
+            {% endif %}">
+                            <textarea id="feedback{{"" + loop.index }}" name="textsOld"
+                                      rows="8">{{ model.form.fields["textsOld"][loop.index] }}</textarea>
+                </div>
+            </div>
+        {% endfor %}
+        <div class="col py-3
+            {% if model.errors contains "newChapterErr" %}
+                border border-3 border-danger
+            {% endif %}">
+            <div class="row">
+                <div class="col">
+                    <label for="chaptersNew">Глава:</label>
+                    <input type="number" id="chaptersNew" name="chaptersNew" min="0"
+                        {% if model.errors contains "chaptersNew" %}
+                           class="border border-3 border-danger"
+                        {% endif %}
+                           value="{{ model.form.fields["chaptersNew"] | first}}">
+                </div>
+                <div class="col">
+                    <label for="namesNew">Название:</label>
+                    <input type="text" id="namesNew" name="namesNew"
+                        {% if model.errors contains "namesNew" %}
+                           class="border border-3 border-danger"
+                        {% endif %}
+                           value="{{ model.form.fields["namesNew"] | first }}">
+                </div>
+                <div class="col text-center">
+                    <label class="h5"><u>Новая</u></label>
+                </div>
+            </div>
+            <label for="chaptersNew" class="form-label">Текст главы:</label>
+            <div class="row mx-2 {% if model.errors contains "textsNew" %}
+                               border border-3 border-danger
+            {% endif %}">
+                            <textarea id="chaptersNew" name="textsNew"
+                                      rows="8">{{ model.form.fields["textsNew"] | first }}</textarea>
+            </div>
+        </div>
+    </div>
+    <div class="row py-3 mx-2">
+        <button type="submit" class="btn mybutton-form">Отправить</button>
+    </div>
+</form>
+{% endblock %}
+

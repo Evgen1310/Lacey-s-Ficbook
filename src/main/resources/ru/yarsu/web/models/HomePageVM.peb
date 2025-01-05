@@ -1,0 +1,25 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.HomePageVM" #}
+    {% extends "./partials/Layout.peb" %}
+    {% block mainPage %}
+    active
+    {% endblock %}
+{% block content %}
+<div class="row py-4 text-center">
+    <div class="col">
+        <div class="h1"><u>САМИЗДАТ</u></div>
+    </div>
+</div>
+<div class="row px-5">
+    <div class="col-md-6">
+        <img class="w-100" src="/images/main.jpg" alt="">
+    </div>
+    <div class="col-md-5 text-center p-3">
+        <h2>O проекте:</h2>
+        <p>Название буквально представляет собой сокращение словосочетания «самостоятельное издательство». Подобные
+            проекты дают возможность создать свою собственную книгу без рамок и обязательств, без правок и чужих
+            советов.</p>
+        <p>Здесь читатель может найти книги самых разных жанров: от любовного романа до постмодернизма.</p>
+        <h5>Теперь можно добавлять свои статьи!</h5>
+    </div>
+</div>
+{% endblock %}

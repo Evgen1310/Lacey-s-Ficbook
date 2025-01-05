@@ -1,0 +1,141 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.ArticleListVM" #}
+    {% extends "./partials/Layout.peb" %}
+    {% block listPage %}
+    active
+    {% endblock %}
+
+{% block content %}
+<div class="row py-4 text-center border-bottom border-dark">
+    <div class="col">
+        <div class="h1"><u>ПРОИЗВЕДЕНИЯ</u></div>
+    </div>
+</div>
+<div class="row border-top border-dark">
+    <div class="col-xl-8">
+        <div class="row py-2 mx-auto">
+                {% if model.errorStrings[1] == 1 %}
+                <h3>По вашему запросу не было найдено статей</h3>
+                {% endif %}
+        </div>
+        <div class="row row-cols-1 row-cols-md-1 g-4 justify-content-md-center py-3">
+                {% for el in model.articles %}
+                <div class="col">
+                    <div class="card text-bg-light text-left">
+                        <div class="card-body bg-dop">
+                            <h4 class="card-title "><u>{{ el.article.nameArt }}</u></h4>
+                            <p class="card-text">{{ el.article.annotation }}</p>
+                            <a class="icon-link btn mybutton" href="articles/{{ el.article.id }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                     class="bi bi-pencil">
+                                    <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783"/>
+                                </svg>
+                                Читать
+                            </a>
+                            {% if permissions.manageAllArticles or el.editArticle %}
+                                <a class="icon-link btn mybutton-dop card-link float-end" href="articles/{{ el.article.id }}/edit">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                         class="bi bi-pencil">
+                                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                                    </svg>
+                                    Редактирование
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer bg-transparent border-success">
+                            Автор: <nobr title="{{ el.article.user }}">{{ el.userNick }}</nobr>
+                            Цензор: {{ el.article.gAge() }}   Дата добавления: {{ el.article.dateAdd | date("dd-MM-yyyy") }}
+                            Форма: {{ el.formStr | lower}}
+                            Жанр: {{ el.genreStr | lower }}
+                        </div>
+                    </div>
+                </div>
+                {%  endfor %}
+        </div>
+    </div>
+    <div class="col-sm-4 border border-top-0 border-right-0 border-bottom-0 border-dark">
+        <form method="GET" id="list">
+            <div class="row">
+                <div class="col bg-dop">
+                    <fieldset>
+                        <legend>Возрастной рейтинг:</legend>
+                        {%  for age in model.ages %}
+                            <div>
+                                <input type="checkbox"
+                                       {% if model.params.ages contains age %}checked{% endif %} name="age"
+                                       id="{{ age.value }}" value="{{ loop.index }}"/>
+                                <label for="{{ age.value }}">{{ age.value }}</label>
+                            </div>
+                        {% endfor %}
+                    </fieldset>
+                </div>
+                <div class="col bg-dop">
+                    <fieldset>
+                        <legend>Формат:</legend>
+                        {%  for formArt in model.forms %}
+                            {% if formArt.id != -1 %}
+                                <div>
+                                    <input type="checkbox"
+                                           {% if model.params.forms contains formArt.id %}checked{% endif %} name="formArt"
+                                           id="{{ formArt.form }}" value="{{ formArt.id }}"/>
+                                    <label for="{{ formArt.form }}">{{ formArt.form }}</label>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </fieldset>
+                </div>
+            </div>
+            <div class="row bg-dop text-black">
+                    {% if model.errorStrings[0] == 1 %}
+                    <h4>Ошибка в параметрах</h4>
+                    {% endif %}
+            </div>
+            <div class="row py-3 bg-dop">
+                <button type="submit" form="list">Применить</button>
+            </div>
+            {% if permissions.manageArticle %}
+                <div class="row py-3 bg-dop">
+                    <a href="/articles/new" class="btn mybutton">Добавить новую статью</a>
+                </div>
+            {% endif %}
+            <div class="row py-5">
+                <div class="col">
+                    <img class="w-100" src="/images/media.png" alt="">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<footer>
+    <div class="container bg-navmain">
+        <div class="medium-8 cell">
+            <nav>
+                <ul class="pagination pagination-lg justify-content-center">
+                    {% if not (model.paginator.getNearStart()) %}
+                        <li class="page-item"><a class="page-link text-nice" href="{{ model.paginator.uri }}">1</a></li>
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                    {% for i in model.paginator.listPrevPage() %}
+                        <li class="page-item"><a class="page-link text-nice" href="{{ i.value }}">{{i.key + 1}}</a></li>
+                    {% endfor %}
+                    <li class="page-item disabled">
+                        <span class="page-link">{{ model.paginator.getStartPage() + 1 }}</span>
+                    </li>
+                    {% for i in model.paginator.listNextPage() %}
+                        <li class="page-item"><a class="page-link text-nice" href="{{ i.value }}">{{i.key + 1}}</a></li>
+                    {% endfor %}
+                    {% if not (model.paginator.getNearEnd()) %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        <li class="page-item"><a class="page-link text-nice"
+                                                 href="{{ model.paginator.getUri(model.paginator.getAllPages()) }}">{{ model.paginator.getAllPages() }}</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</footer>
+{% endblock %}

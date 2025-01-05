@@ -1,0 +1,55 @@
+.bg-navmain {
+  background-color: rgb(230 0 115);
+}
+.bg-mymain {
+  background-color: rgb(255 192 203);
+}
+.bg-space{
+  background-color: rgb(108 14 255);
+}
+.bg-space-dop{
+  background-color: rgb(255 216 255);
+}
+.bg-border {
+  background-color: rgb(140 38 120);
+  font-family: Comic Sans MS;
+  color: #66194d;
+}
+.bg-dop {
+  background-color: rgb(255 214 237);
+}
+.bg-chapters {
+    background-color: rgb(255 150 232);
+}
+.bg-mysecondary {
+    background-color: rgb(226 226 226);
+}
+.mybutton-secondary{
+    background-color: rgb(231 193 199);
+}
+.mybutton-secondary:hover{
+    background-color: rgb(253 205 212);
+}
+.mybutton {
+  background-color: rgb(230 0 115);
+}
+.mybutton:hover {
+    background-color: rgb(226 79 153)
+}
+.mybutton-dop {
+    background-color: rgb(255 150 232);
+}
+.mybutton-dop:hover {
+    background-color: rgb(226 79 153)
+}
+.mybutton-form {
+    height: 75px;
+    background-color: rgb(230 0 115);
+}
+.mybutton-form:hover {
+    background-color: rgb(226 79 153)
+}
+.text-nice {
+    color: #66194d;
+}
+.float-bottom {bottom: 0;}

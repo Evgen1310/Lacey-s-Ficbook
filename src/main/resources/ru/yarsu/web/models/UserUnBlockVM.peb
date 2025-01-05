@@ -1,0 +1,45 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.UserBlockVM" #}
+    {% extends "./partials/Layout.peb" %}
+    {% block mainColor %}
+    bg-space
+    {% endblock %}}
+{% block content %}
+<div class="row">
+    <img class="w-100 mx-auto" src="/images/top.png" alt="">
+</div>
+<div class="row mx-auto text-left">
+    <div class="col text-left">
+        <img class="w-100" src="/images/left.png" alt="">
+    </div>
+    <div class="col-md-5 px-5 bg-space-dop h-25 border border-dark border-3 g-2">
+        <form method="POST">
+            <div class="row text-center my-2">
+                <div class="col">
+                    <div class="h1 text-black">Вы уверены?</div>
+                </div>
+            </div>
+            <div class="col ">
+                <div class="row border border-bottom-0 border-dark border-3 mx-4 text-center">
+                    <p class="text-black h6">{{ model.errorStr }}</p>
+                </div>
+                <div class="row border-top border-dark border-3">
+                </div>
+                <div class="row row-col-1 row-cols-md-1 mx-auto fw-light bg-dop border-bottom border-dark border-3 my-2">
+                    <div class="col"><p><u>Логин:</u> {{ model.user.login }}</p></div>
+                    <div class="col"><p><u>Никнейм:</u> {{ model.user.nickName }}</p></div>
+                    <div class="col"><p><u>Роль:</u> <nobr class="text-black">{{ model.role.role }}</nobr></p></div>
+                    <div class="col"><p><u>О пользователе:</u> {{ model.user.about | lower }}</p></div>
+                </div>
+                <div class="row py-3 border-top border-dark border-3">
+                    <button type="submit" class="btn mybutton">Разблокировать</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col">
+        <img class="w-100 mx-auto" src="/images/right.png" alt="">
+    </div>
+</div>
+
+{% endblock %}
+

@@ -1,0 +1,93 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.UserEditVM" #}
+    {% extends "./partials/Layout.peb" %}
+    {% block mainColor %}
+    bg-space
+    {% endblock %}}
+{% block content %}
+<div class="row">
+    <img class="w-100 mx-auto" src="/images/top.png" alt="">
+</div>
+<div class="row mx-auto text-left">
+    <div class="col text-left">
+        <img class="w-100" src="/images/left.png" alt="">
+    </div>
+    <div class="col-md-5 g-2 px-5 bg-space-dop h-25 border border-dark border-3 ">
+        <div class="row text-center my-2">
+            <div class="col">
+                <div class="h1">Редактирование <u>{{ model.user.login }}</u></div>
+            </div>
+        </div>
+        <div class="col ">
+            <div class="row border border-bottom-0 border-dark border-3 mx-4 text-center">
+                <p class="text-black h6">{{ model.errorStr }}</p>
+            </div>
+            <div class="row border-top border-dark border-3">
+            </div>
+            <form method="POST">
+                <div class="row row-col-1 row-cols-md-1 g-2 py-3">
+                    <div class="col">
+                        <label for="nickname">Никнейм:</label>
+                        <input type="text" id="nickname" name="nickname"
+                            {% if model.errors contains "nickname" or model.errors contains "nicknameExist" %}
+                               class="border border-3 border-danger"
+                            {% endif %}
+                               value="{{ model.form.fields["nickname"] | first}}">
+                    </div>
+                    <div class="col">
+                        <label for="password">Пароль:</label>
+                        <input type="password" id="password" name="password" placeholder="Пусто - пароль не изменится"
+                            {% if model.errors contains "password" or model.errors contains "incorrect" %}
+                               class="border border-3 border-danger"
+                            {% endif %}
+                               value="{{ model.form.fields["password"] | first}}">
+                    </div>
+                </div>
+                <div class="row row-col-1 row-cols-md-1 border-top border-bottom border-dark g-2 py-3">
+                    <div class="col">
+                        <label for="role">Роль:</label>
+                        <select id="role" name="role"
+                            {% if model.errors contains "role" %}
+                                class="border border-3 border-danger"
+                            {% endif %}
+                        >
+                            <option disabled {% if model.roleChosen.id < 0 %}selected{% endif %}>
+                                Не выбрано
+                            </option>
+                            {% for role in model.roles %}
+                                {% if role.id > 0 %}
+                                    <option
+                                        {% if model.roleChosen == role %}
+                                                selected
+                                        {% endif %}
+                                                value="{{ role.id }}">{{ role.role }}
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row py-2 g-1 ">
+                    <div class="col">
+                        <label for="about" class="form-label">О пользователе:</label>
+                        <div class="row mx-2">
+                            <textarea id="about" name="about"
+                                {% if model.errors contains "about" %}
+                                      class="border border-3 border-danger"
+                                {% endif %}
+                                      rows="3">{{ model.form.fields["about"] | first }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row py-3 border-top border-dark border-3">
+                    <button type="submit" class="btn mybutton">Отправить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col">
+        <img class="w-100 mx-auto" src="/images/right.png" alt="">
+    </div>
+</div>
+
+{% endblock %}
+

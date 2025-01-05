@@ -1,0 +1,56 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.FormDeleteVM" #}
+    {% extends "./partials/Layout.peb" %}
+{% block content %}
+<div class="row">
+    {#    <img class="w-100 mx-auto" src="/images/neighbor.png" alt="">#}
+</div>
+<div class="row mx-auto text-left">
+    <div class="col text-left">
+        {#        <img class="w-100" src="/images/left.png" alt="">#}
+    </div>
+    <div class="col-md-5 g-4 px-5 bg-space-dop h-25 border border-dark border-3 g-4">
+        <div class="row text-center my-2">
+            <div class="col">
+                <div class="h1">Выкидываем {{ model.name }}?</div>
+            </div>
+        </div>
+        <div class="col ">
+            <div class="row border border-bottom-0 border-dark border-3 mx-4 text-center">
+                <p></p>
+            </div>
+            <div class="row border-top border-dark border-3">
+            </div>
+            <form method="post">
+                <div class="row text-center mt-1 py-2">
+                    <div class="col">
+                        <button type="submit" class="icon-link btn mybutton-dop card-link my-2 w-75">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                 class="bi bi-pencil">
+                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                            </svg>
+                            Да
+                        </button>
+                    </div>
+                    <div class="col">
+                        <a class="icon-link btn mybutton card-link my-2 w-75" href="/redaction/forms">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                 class="bi bi-pencil">
+                                <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                            </svg>
+                            Нет
+                        </a>
+                    </div>
+                </div>
+            </form>
+            <div class="row border-top border-dark border-3">
+                <p></p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        {#        <img class="w-100 mx-auto" src="/images/right.png" alt="">#}
+    </div>
+</div>
+
+{% endblock %}
+

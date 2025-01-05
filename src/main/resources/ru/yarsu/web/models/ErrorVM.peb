@@ -1,0 +1,33 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.ErrorVM" #}
+    {% extends "./partials/Layout.peb" %}
+    {% block navbarColor %}"bg-secondary"{% endblock %}
+    {% block mainColor %}bg-light{% endblock %}
+    {% block borderColor %}bg-secondary{% endblock %}
+{% block content %}
+<div class="row px-5">
+    <div class="col-md-6">
+        <img class="w-100" src="/images/error_new.jpg" alt="">
+    </div>
+    <div class="col-md-5 text-center p-3">
+        <div class="card text-left">
+            <div class="card-body">
+                {% if model.mode == 0 %}
+                    <h4 class="card-title "><u>Вы не готовы к этому...</u></h4>
+                    <p class="card-text">Просмотр страницы по адресу: {{ model.uri }} для вас запрещён.</p>
+                    <a href="/" class="btn btn-secondary">На главную</a>
+                {% endif %}
+                {% if model.mode == -1 %}
+                    <h4 class="card-title "><u>Страница не найдена</u></h4>
+                    <p class="card-text">Запрос по адресу: {{ model.uri }} не может быть обработан.</p>
+                    <a href="/" class="btn btn-secondary">На главную</a>
+                {% endif %}
+                {% if model.mode == -2 %}
+                    <h4 class="card-title "><u>Вас нет...</u></h4>
+                    <p class="card-text">Ваш аккаунт был заблокирован. Создайте новый либо покиньте сайт.</p>
+                    <a href="/logout" class="btn btn-secondary">Выход</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

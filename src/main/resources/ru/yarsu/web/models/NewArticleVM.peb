@@ -1,0 +1,96 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.NewArticleVM" #}
+    {% extends "./partials/Layout.peb" %}
+{% block content %}
+<div class="row py-4 text-center">
+    <div class="col">
+        <div class="h1"><u>Мой маленький конструктор</u></div>
+    </div>
+</div>
+<div class="row px-5 py-2 mx-auto border-top border-dark text-left">
+    <div class="col-md-5 g-4 bg-dop h-25">
+        <form method="POST">
+            <div class="row row-col-1 row-cols-md-1 border-dark g-1 py-3 my-3">
+                <div class="col">
+                    <label for="name">Название:</label>
+                    <input type="text" id="name" name="name"
+                        {% if model.errors contains "name" %}
+                           class="border border-3 border-danger"
+                        {% endif %}
+                           value="{{ model.form.fields["name"] | first}}">
+                </div>
+                <div class="col">
+                    <label for="annotation">Аннотация:</label>
+                    <input type="text" id="annotation" name="annotation"
+                        {% if model.errors contains "annotation" %}
+                           class="border border-3 border-danger"
+                        {% endif %}
+                           value="{{ model.form.fields["annotation"] | first}}">
+                </div>
+            </div>
+            <div class="row row-col-1 row-cols-md-1 border-top border-bottom border-dark g-2 py-3">
+                <div class="col">
+                    <label for="age">Возрастной рейтинг:</label>
+                    <select id="age" name="age"
+                        {% if model.errors contains "age" %}
+                            class="border border-3 border-danger"
+                        {% endif %}
+                    >
+                        <option disabled {% if model.params.age == -1 %}selected{% endif %}>Не выбрано</option>
+                        {% for age in model.ages %}
+                            <option
+                                {% if model.params.age == loop.index %}
+                                        selected
+                                {% endif %}
+                                        value="{{ loop.index }}">{{ age.value }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col">
+                    <label for="formArt">Форма:</label>
+                    <select id="formArt" name="formArt"
+                        {% if model.errors contains "formArt" %}
+                            class="border border-3 border-danger"
+                        {% endif %}
+                    >
+                        <option disabled {% if model.params.form == -1 %}selected{% endif %}>Не выбрано</option>
+                        {% for form in model.forms %}
+                            {% if form.id != -1 %}
+                                <option
+                                        {% if model.params.form == form.id %}selected{% endif %}
+                                        value="{{ form.id }}">{{ form.form }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <label for="genre">Жанр:</label>
+                    <select id="genre" name="genre"
+                        {% if model.errors contains "genre" %}
+                            class="border border-3 border-danger"
+                        {% endif %}
+                    >
+                        <option disabled {% if model.params.genre == -1 %}selected{% endif %}>Не выбрано
+                        </option>
+                        {% for genre in model.genres %}
+                            {% if genre.id != -1 %}
+                                <option
+                                        {% if model.params.genre == genre.id %}selected{% endif %}
+                                        value="{{ genre.id }}">{{ genre.genre }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row py-3 ">
+                <button type="submit" class="btn mybutton">Отправить</button>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-7 justify-content-md-center text-center">
+        <img class="w-50" src="/images/phone.png" alt="">
+    </div>
+</div>
+
+{% endblock %}
+

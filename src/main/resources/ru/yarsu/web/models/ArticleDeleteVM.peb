@@ -1,0 +1,62 @@
+{# @pebvariable name="model" type="ru.yarsu.web.models.ArticleDeleteVM" #}
+    {% extends "./partials/Layout.peb" %}
+{% block content %}
+<div class="row py-4 text-center">
+    <div class="col">
+        <div class="h1"><u>Мой маленький удалятор {{ model.article.article.nameArt }}</u></div>
+    </div>
+</div>
+<div class="row px-5 mx-auto border-top border-dark text-left">
+    <div class="col-6 g-4 bg-dop">
+        <div class="row text-center py-3 my-1">
+            <div class="h4 text-black"><u>Вы уверены, что эту статью нужно удалить?</u></div>
+        </div>
+        <div class="row row-col-1 row-cols-md-1 border-top border-bottom border-dark mx-auto fw-light bg-dop">
+            <div class="col"><p title="{{ model.article.article.user }}">Автор: {{ model.article.userNick }}</p></div>
+            <div class="col"><p>Об авторе:
+                {% if model.article.userAbout == "" %}
+                    сказать не о чем
+                {% endif %}
+                {{ model.article.userAbout | lower}}</p></div>
+            <div class="col"><p>Возрастной рейтинг: {{ model.article.article.gAge() }}</p></div>
+            <div class="col"><p>Форма: {{ model.article.formStr | lower }}</p></div>
+            <div class="col"><p>Жанр: {{ model.article.genreStr | lower}}</p></div>
+            <div class="col">
+                <p>Теги:
+                    {% if model.article.article.tagsArt is empty %}
+                        отсутствуют
+                    {% endif %}
+                    {{ model.tags | join(", ")}}
+                </p>
+            </div>
+        </div>
+        <form method="post">
+            <div class="row text-center mt-1 py-2">
+                <div class="col">
+                    <button type="submit" class="icon-link btn mybutton-dop card-link my-2 w-75">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                             class="bi bi-pencil">
+                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                        </svg>
+                        Да
+                    </button>
+                </div>
+                <div class="col">
+                    <a class="icon-link btn mybutton card-link my-2 w-75" href="/articles/{{ model.article.id }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                             class="bi bi-pencil">
+                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+                        </svg>
+                        Нет
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-6 justify-content-md-center text-center py-4">
+        <img class="w-75" src="/images/delete.jpg" alt="">
+    </div>
+</div>
+
+{% endblock %}
+
