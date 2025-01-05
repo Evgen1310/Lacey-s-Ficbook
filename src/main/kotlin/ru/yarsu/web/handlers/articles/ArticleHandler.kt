@@ -8,8 +8,10 @@ import org.http4k.lens.Query
 import org.http4k.lens.RequestContextLens
 import org.http4k.lens.int
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
-import ru.yarsu.db.DataBaseController
 import ru.yarsu.web.domain.Paginator
+import ru.yarsu.web.domain.storage.AddonStorage
+import ru.yarsu.web.domain.storage.ArticleStorage
+import ru.yarsu.web.domain.storage.UserStorage
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.funs.lensOrNull
 import ru.yarsu.web.models.ArticleVM
@@ -17,8 +19,10 @@ import ru.yarsu.web.users.User
 
 class ArticleHandler(
     private val htmlView: ContextAwareViewRender,
+    private val storage: ArticleStorage,
+    private val addon: AddonStorage,
+    private val userStorage: UserStorage,
     private val userLens: RequestContextLens<User?>,
-    private val dataBaseController: DataBaseController,
 ) : HttpHandler {
     private val pathLens = Path.int().of("id")
     private val pageLens = Query.int().required("page")
@@ -26,24 +30,24 @@ class ArticleHandler(
     override fun invoke(request: Request): Response {
         val login = lensOrNull(userLens, request)?.login ?: ""
         lensOrNull(pathLens, request)
-            ?.let { id -> dataBaseController.getArticleById(id) }
+            ?.let { id -> storage.getArticleId(id) }
             ?.let { entity ->
                 val page = lensOrDefault(pageLens, request, 0).takeIf { it > -1 } ?: 0
-                val chapter = dataBaseController.getChaptersByIds(entity.chapters)[page]
+                val chapter = addon.getChaptersByIds(entity.chapters)[page]
                 val paginator = Paginator(page, entity.chapters.size, request.uri.removeQueries("page"))
                 return Response(OK).with(
-                    htmlView(request) of
-                        ArticleVM(
-                            makeArticlesWithData(
-                                login,
-                                listOf(entity),
-                                dataBaseController,
-                            )[0],
-                            dataBaseController.getTagsByIds(entity.tagsArt),
-                            chapter,
-                            dataBaseController.getChaptersByIds(entity.chapters),
-                            paginator,
-                        ),
+                    htmlView(request) of ArticleVM(
+                        makeArticlesWithData(
+                            login,
+                            listOf(entity),
+                            addon,
+                            userStorage
+                        )[0],
+                        addon.getTagsByIds(entity.tagsArt),
+                        chapter,
+                        addon.getChaptersByIds(entity.chapters),
+                        paginator,
+                    )
                 )
             } ?: return Response(NOT_FOUND)
     }

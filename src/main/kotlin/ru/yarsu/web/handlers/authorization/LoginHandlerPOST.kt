@@ -14,7 +14,7 @@ import org.http4k.lens.WebForm
 import org.http4k.lens.nonBlankString
 import org.http4k.lens.webForm
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
-import ru.yarsu.db.DataBaseController
+import ru.yarsu.web.domain.storage.UserStorage
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.jwt.JwtTools
 import ru.yarsu.web.models.LoginVM
@@ -24,7 +24,7 @@ import java.time.ZonedDateTime
 
 class LoginHandlerPOST(
     private val htmlView: ContextAwareViewRender,
-    private val dataBaseController: DataBaseController,
+    private val userStorage: UserStorage,
     private val jwtTools: JwtTools,
 ) : HttpHandler {
     private val loginField = FormField.nonBlankString().required("login")
@@ -79,9 +79,9 @@ class LoginHandlerPOST(
 
     private fun checkErrors(form: WebForm): List<String> {
         val errors = form.errors.map { it.meta.name }.toMutableList()
-        val user = dataBaseController.getUser(lensOrDefault(loginField, form, ""))
+        val user = userStorage.getUser(lensOrDefault(loginField, form, ""))
         user?.let {
-            if (!dataBaseController.checkPassword(lensOrDefault(passwordField, form, ""), user.password)) {
+            if (!userStorage.checkPassword(lensOrDefault(passwordField, form, ""), user.password)) {
                 errors.add("incorrect")
             }
         } ?: errors.add("incorrect")

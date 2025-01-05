@@ -12,11 +12,11 @@ import org.http4k.lens.WebForm
 import org.http4k.lens.nonBlankString
 import org.http4k.lens.webForm
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
-import ru.yarsu.db.DataBaseController
+import ru.yarsu.web.domain.storage.AddonStorage
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.models.GenreNewVM
 
-class GenreNewHandlerPOST(private val htmlView: ContextAwareViewRender, private val dataBaseController: DataBaseController) :
+class GenreNewHandlerPOST(private val htmlView: ContextAwareViewRender, private val addon: AddonStorage) :
     HttpHandler {
     private val genreField = FormField.nonBlankString().required("genre")
     private val formLens =
@@ -32,7 +32,7 @@ class GenreNewHandlerPOST(private val htmlView: ContextAwareViewRender, private 
             val viewModel = GenreNewVM(form, errors, errorString(errors))
             return Response(Status.OK).with(htmlView(request) of viewModel)
         }
-        dataBaseController.addGenre(genreField(form))
+        addon.addGenre(genreField(form))
         return Response(Status.FOUND).header("Location", "/redaction/genres")
     }
 
@@ -47,9 +47,8 @@ class GenreNewHandlerPOST(private val htmlView: ContextAwareViewRender, private 
     private fun checkErrors(form: WebForm): List<String> {
         val errors = form.errors.map { it.meta.name }.toMutableList()
         val genreNew = lensOrDefault(genreField, form, "")
-        if (dataBaseController.checkGenre(genreNew)) {
+        if (addon.checkGenre(genreNew))
             errors.add("genreExist")
-        }
         return errors
     }
 }

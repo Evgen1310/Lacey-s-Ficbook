@@ -13,10 +13,11 @@ import org.http4k.lens.int
 import org.http4k.lens.nonBlankString
 import org.http4k.lens.webForm
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
-import ru.yarsu.db.DataBaseController
 import ru.yarsu.web.domain.Permissions
 import ru.yarsu.web.domain.article.AgeRatingBook
 import ru.yarsu.web.domain.article.Article
+import ru.yarsu.web.domain.storage.AddonStorage
+import ru.yarsu.web.domain.storage.ArticleStorage
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.models.NewArticleVM
 import ru.yarsu.web.users.User
@@ -24,13 +25,13 @@ import java.time.LocalDateTime
 
 class NewArticleHandlerPOST(
     private val htmlView: ContextAwareViewRender,
+    private val storage: ArticleStorage,
+    private val addon: AddonStorage,
     private val userLens: RequestContextLens<User?>,
     private val permissionsLens: RequestContextLens<Permissions>,
-    private val dataBaseController: DataBaseController,
 ) : HttpHandler {
     private val nameField = FormField.nonBlankString().required("name")
     private val annotationField = FormField.nonBlankString().optional("annotation")
-
 //    private val authorField = FormField.nonBlankString().required("author")
 //    private val aboutField = FormField.nonBlankString().optional("about")
     private val ageField = FormField.int().required("age")
@@ -63,28 +64,29 @@ class NewArticleHandlerPOST(
                 NewArticleVM(
                     form,
                     AgeRatingBook.entries,
-                    dataBaseController.getAllForms(),
-                    dataBaseController.getAllGenres(),
+                    addon.getAllForms(),
+                    addon.getAllGenres(),
                     errorsName,
                     IntParams(age, formArt, genre),
                 )
             return Response(Status.OK).with(htmlView(request) of viewModel)
         }
-        val id =
-            dataBaseController.addArticle(
-                Article(
-                    nameArt = nameField(form),
-                    dateAdd = LocalDateTime.now(),
+        val id = storage.newId()
+        storage.addArticle(
+            Article(
+                LocalDateTime.now(),
+                nameField(form),
 //                addon.addAuthor(authorField(form), lensOrDefault(aboutField, form, "")),
-                    censorAge = age,
-                    formArt = formArt,
-                    chapters = mutableListOf(),
-                    genre = genre,
-                    annotation = lensOrDefault(annotationField, form, ""),
-                    tagsArt = mutableListOf(),
-                    user = login,
-                ),
-            )
+                age,
+                formArt,
+                listOf(),
+                genre,
+                lensOrDefault(annotationField, form, ""),
+                listOf(),
+                id,
+                login,
+            ),
+        )
         return Response(Status.FOUND).header("Location", "/articles/$id")
     }
 }

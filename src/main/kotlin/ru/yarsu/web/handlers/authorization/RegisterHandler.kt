@@ -16,10 +16,10 @@ class RegisterHandler(
     private val userLens: RequestContextLens<User?>,
 ) :
     HttpHandler {
+
     override fun invoke(request: Request): Response {
-        if (userLens(request) != null) {
+        if (userLens(request) != null)
             return Response(Status.UNAVAILABLE_FOR_LEGAL_REASONS)
-        }
         val viewModel =
             RegisterVM(
                 WebForm(),

@@ -12,14 +12,14 @@ import org.http4k.lens.WebForm
 import org.http4k.lens.nonBlankString
 import org.http4k.lens.webForm
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
-import ru.yarsu.db.DataBaseController
+import ru.yarsu.web.domain.storage.UserStorage
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.funs.lensOrNull
 import ru.yarsu.web.models.RegisterVM
 
 class RegisterHandlerPOST(
     private val htmlView: ContextAwareViewRender,
-    private val dataBaseController: DataBaseController,
+    private val userStorage: UserStorage,
 ) :
     HttpHandler {
     private val loginField = FormField.nonBlankString().required("login")
@@ -51,13 +51,13 @@ class RegisterHandlerPOST(
             return Response(Status.OK).with(htmlView(request) of viewModel)
         }
         val user =
-            dataBaseController.createUser(
+            userStorage.createUser(
                 loginField(form),
                 passwordInitField(form),
                 nicknameField(form),
                 lensOrDefault(aboutField, form, ""),
             )
-        dataBaseController.addUser(user)
+        userStorage.addUser(user)
         return Response(Status.FOUND).header("Location", "/login")
     }
 
@@ -66,10 +66,10 @@ class RegisterHandlerPOST(
         if (lensOrNull(passwordInitField, form) != lensOrNull(passwordConfField, form)) {
             errors.add("passwordDiff")
         }
-        if (dataBaseController.checkLogin(lensOrNull(loginField, form))) {
+        if (userStorage.checkLogin(lensOrNull(loginField, form))) {
             errors.add("loginExist")
         }
-        if (dataBaseController.checkNickname(lensOrNull(nicknameField, form))) {
+        if (userStorage.checkNickname(lensOrNull(nicknameField, form))) {
             errors.add("nicknameExist")
         }
         return errors

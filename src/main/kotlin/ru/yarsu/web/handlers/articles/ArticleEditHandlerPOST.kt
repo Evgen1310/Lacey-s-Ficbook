@@ -16,10 +16,11 @@ import org.http4k.lens.int
 import org.http4k.lens.nonBlankString
 import org.http4k.lens.webForm
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
-import ru.yarsu.db.DataBaseController
 import ru.yarsu.web.domain.Permissions
 import ru.yarsu.web.domain.article.AgeRatingBook
 import ru.yarsu.web.domain.article.Article
+import ru.yarsu.web.domain.storage.AddonStorage
+import ru.yarsu.web.domain.storage.ArticleStorage
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.funs.lensOrNull
 import ru.yarsu.web.models.ArticleEditVM
@@ -27,9 +28,10 @@ import ru.yarsu.web.users.User
 
 class ArticleEditHandlerPOST(
     private val htmlView: ContextAwareViewRender,
+    val storage: ArticleStorage,
+    private val addon: AddonStorage,
     private val userLens: RequestContextLens<User?>,
     private val permissionsLens: RequestContextLens<Permissions>,
-    private val dataBaseController: DataBaseController,
 ) :
     HttpHandler {
     private val pathLens = Path.int().of("id")
@@ -70,7 +72,7 @@ class ArticleEditHandlerPOST(
         val permissions = permissionsLens(request)
         val login = userLens(request)?.login ?: ""
         lensOrNull(pathLens, request)
-            ?.let { id -> dataBaseController.getArticleById(id) }
+            ?.let { id -> storage.getArticleId(id) }
             ?.let { entity ->
                 if (!permissions.manageAllArticles) {
                     if (!(permissions.manageArticle && entity.user == login)) {
@@ -79,25 +81,17 @@ class ArticleEditHandlerPOST(
                 }
                 val form = formLens(request)
                 val formArt =
-                    if (dataBaseController.getFormById(lensOrDefault(formArtField, form, -1)).form == "Не определено") {
+                    if (addon.getFormById(lensOrDefault(formArtField, form, -1)) == "Не выбрано") -1 else lensOrDefault(
+                        formArtField,
+                        form,
                         -1
-                    } else {
-                        lensOrDefault(
-                            formArtField,
-                            form,
-                            -1,
-                        )
-                    }
+                    )
                 val genreArt =
-                    if (dataBaseController.getGenreById(lensOrDefault(genreField, form, -1)).genre == "Не определено") {
+                    if (addon.getGenreById(lensOrDefault(genreField, form, -1)) == "Не выбрано") -1 else lensOrDefault(
+                        genreField,
+                        form,
                         -1
-                    } else {
-                        lensOrDefault(
-                            genreField,
-                            form,
-                            -1,
-                        )
-                    }
+                    )
                 val errors =
                     prepareErrors(
                         form,
@@ -109,8 +103,8 @@ class ArticleEditHandlerPOST(
                             entity.nameArt,
                             form,
                             AgeRatingBook.entries,
-                            dataBaseController.getAllForms(),
-                            dataBaseController.getAllGenres(),
+                            addon.getAllForms(),
+                            addon.getAllGenres(),
                             errors,
                             IntParams(
                                 lensOrDefault(ageField, form, -1),
@@ -120,36 +114,34 @@ class ArticleEditHandlerPOST(
                         )
                     return Response(Status.OK).with(htmlView(request) of viewModel)
                 }
-                val chapters =
-                    dataBaseController.prepareChapters(
-                        entity,
-                        lensOrDefault(chaptersOldField, form, listOf()),
-                        lensOrDefault(delChpField, form, listOf()),
-                        lensOrDefault(namesOldField, form, listOf()),
-                        lensOrDefault(textsOldField, form, listOf()),
-                        lensOrDefault(chaptersNewField, form, -1),
-                        lensOrDefault(namesNewField, form, ""),
-                        lensOrDefault(textsNewField, form, ""),
-                    )
-                val tags =
-                    dataBaseController.prepareTags(
-                        lensOrDefault(tagsOldField, form, listOf()),
-                        lensOrDefault(tagsNewField, form, ""),
-                    )
-                val articleToDo =
-                    Article(
-                        nameArt = nameField(form),
-                        dateAdd = entity.dateAdd,
-                        censorAge = lensOrDefault(ageField, form, -1),
-                        formArt = lensOrDefault(formArtField, form, -1),
-                        tagsArt = mutableListOf(),
-                        genre = lensOrDefault(genreField, form, -1),
-                        annotation = lensOrDefault(annotationField, form, ""),
-                        chapters = mutableListOf(),
-                        user = login,
-                    )
-                dataBaseController.prepareArticle(entity.id, articleToDo, tags, chapters)
-                return Response(Status.FOUND).header("Location", "/articles/${entity.id}")
+                val chapters = addon.prepareChapters(
+                    entity,
+                    lensOrDefault(chaptersOldField, form, listOf()),
+                    lensOrDefault(delChpField, form, listOf()),
+                    lensOrDefault(namesOldField, form, listOf()),
+                    lensOrDefault(textsOldField, form, listOf()),
+                    lensOrDefault(chaptersNewField, form, -1),
+                    lensOrDefault(namesNewField, form, ""),
+                    lensOrDefault(textsNewField, form, ""),
+                )
+                val tags = addon.prepareTags(
+                    lensOrDefault(tagsOldField, form, listOf()),
+                    lensOrDefault(tagsNewField, form, ""),
+                )
+                val articleToDo = Article(
+                    entity.dateAdd,
+                    nameField(form),
+                    lensOrDefault(ageField, form, -1),
+                    lensOrDefault(formArtField, form, -1),
+                    listOf(),
+                    lensOrDefault(genreField, form, -1),
+                    lensOrDefault(annotationField, form, ""),
+                    listOf(),
+                    entity.id,
+                    login,
+                )
+                val id = storage.prepareArticle(articleToDo, tags, chapters)
+                return Response(Status.FOUND).header("Location", "/articles/$id")
             } ?: return Response(NOT_FOUND)
     }
 

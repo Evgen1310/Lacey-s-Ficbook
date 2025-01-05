@@ -14,15 +14,16 @@ import org.http4k.lens.int
 import org.http4k.lens.nonBlankString
 import org.http4k.lens.webForm
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
-import ru.yarsu.db.DataBaseController
+import ru.yarsu.web.domain.storage.AddonStorage
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.funs.lensOrNull
 import ru.yarsu.web.models.FormEditVM
 
 class FormEditHandlerPOST(
     private val htmlView: ContextAwareViewRender,
-    private val dataBaseController: DataBaseController,
+    private val addonStorage: AddonStorage,
 ) : HttpHandler {
+
     private val pathLens = Path.int().of("id")
     private val newFormField = FormField.nonBlankString().required("newForm")
     private val formLens =
@@ -34,24 +35,22 @@ class FormEditHandlerPOST(
     override fun invoke(request: Request): Response {
         lensOrNull(pathLens, request)
             ?.let { id ->
-                dataBaseController.getFormById(id)
+                addonStorage.getFormById(id)
                     .let { formArt ->
-                        if (formArt.form == "Не определено") {
+                        if (formArt == "Не выбрано")
                             return Response(Status.NOT_FOUND)
-                        }
                         val form = formLens(request)
-                        val errors = checkErrors(form, formArt.form)
+                        val errors = checkErrors(form, formArt)
                         if (errors.isNotEmpty()) {
-                            val viewModel =
-                                FormEditVM(
-                                    form,
-                                    formArt.form,
-                                    errors,
-                                    errorString(errors),
-                                )
+                            val viewModel = FormEditVM(
+                                form,
+                                formArt,
+                                errors,
+                                errorString(errors),
+                            )
                             return Response(Status.OK).with(htmlView(request) of viewModel)
                         }
-                        dataBaseController.changeForm(id, newFormField(form))
+                        addonStorage.changeForm(id, newFormField(form))
                         return Response(Status.FOUND).header("Location", "/redaction/forms")
                     }
             } ?: return Response(Status.NOT_FOUND)
@@ -65,15 +64,11 @@ class FormEditHandlerPOST(
         return resultStr
     }
 
-    private fun checkErrors(
-        form: WebForm,
-        formArtOld: String,
-    ): List<String> {
+    private fun checkErrors(form: WebForm, formArtOld: String): List<String> {
         val errors = form.errors.map { it.meta.name }.toMutableList()
         val formArtNew = lensOrDefault(newFormField, form, "")
-        if (dataBaseController.checkForm(formArtNew, formArtOld)) {
+        if (addonStorage.checkForm(formArtNew, formArtOld))
             errors.add("formExist")
-        }
         return errors
     }
 }

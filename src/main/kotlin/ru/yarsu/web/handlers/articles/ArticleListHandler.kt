@@ -13,13 +13,15 @@ import org.http4k.lens.Query
 import org.http4k.lens.RequestContextLens
 import org.http4k.lens.int
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
-import ru.yarsu.db.DataBaseController
 import ru.yarsu.web.domain.Paginator
 import ru.yarsu.web.domain.Params
 import ru.yarsu.web.domain.PebbleParams
 import ru.yarsu.web.domain.article.AgeRatingBook
 import ru.yarsu.web.domain.article.Article
 import ru.yarsu.web.domain.article.ArticleWithData
+import ru.yarsu.web.domain.storage.AddonStorage
+import ru.yarsu.web.domain.storage.ArticleStorage
+import ru.yarsu.web.domain.storage.UserStorage
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.funs.lensOrNull
 import ru.yarsu.web.funs.prepareErrorStrings
@@ -28,7 +30,9 @@ import ru.yarsu.web.users.User
 
 class ArticleListHandler(
     private val htmlView: ContextAwareViewRender,
-    private val dataBaseController: DataBaseController,
+    private val articles: ArticleStorage,
+    private val addon: AddonStorage,
+    private val userStorage: UserStorage,
     private val userLens: RequestContextLens<User?>,
 ) : HttpHandler {
     private val pageLens = Query.int().required("page")
@@ -42,16 +46,16 @@ class ArticleListHandler(
         val ages = lensOrNull(ageLens, request)
         val forms = lensOrNull(formLens, request)
         val params = prepareParamsss(ages, forms, uri)
-        val sorted = dataBaseController.sortedArticlesByPageNumber(params, page)
-        val paginator = Paginator(page, dataBaseController.pageAmountArticle(sorted.size), uri.removeQueries("page"))
+        val sorted = articles.sortArticles(params)
+        val paginator = Paginator(page, articles.pageAmount(sorted), uri.removeQueries("page"))
         val viewModel =
             ArticleListVM(
-                makeArticlesWithData(login, sorted.articles, dataBaseController),
+                makeArticlesWithData(login, articles.articlesByPageNumber(page, sorted), addon, userStorage),
                 preparePebble(params),
                 paginator,
                 prepareErrorStrings(params.error, sorted.size),
                 AgeRatingBook.entries,
-                dataBaseController.getAllForms(),
+                addon.getAllForms(),
             )
         return Response(Status.OK).with(htmlView(request) of viewModel)
     }
@@ -60,17 +64,14 @@ class ArticleListHandler(
 fun makeArticlesWithData(
     login: String,
     articles: List<Article>,
-    dataBaseController: DataBaseController,
+    addonStorage: AddonStorage,
+    userStorage: UserStorage
 ): List<ArticleWithData> {
-    val forms = dataBaseController.getAllForms()
-    val genres = dataBaseController.getAllGenres()
-    val users = dataBaseController.getAllUsers().associateBy({it.login}, {it})
     val result = mutableListOf<ArticleWithData>()
     articles.forEach {
-        val artData = dataBaseController.createArticleWithData(it, forms, genres, users[it.user])
-        if (artData.article.user == login) {
-            artData.editArticle = true
-        }
+        var artData = addonStorage.createArticleWithData(it, userStorage, addonStorage)
+        if (artData.article.user == login)
+            artData = artData.copy(editArticle = true)
         result.add(artData)
     }
     return result

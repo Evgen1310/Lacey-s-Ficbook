@@ -7,13 +7,14 @@ import org.http4k.core.Status
 import org.http4k.lens.RequestContextLens
 import ru.yarsu.web.domain.Permissions
 
-fun blockedFilter(permissionsLens: RequestContextLens<Permissions>): Filter =
+fun blockedFilter(
+    permissionsLens: RequestContextLens<Permissions>,
+): Filter =
     Filter { next: HttpHandler ->
         { request ->
-            if (permissionsLens(request).isBlocked) {
+            if (permissionsLens(request).isBlocked)
                 Response(Status.FORBIDDEN).header("Location", "/")
-            } else {
+            else
                 next(request)
-            }
         }
     }

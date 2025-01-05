@@ -8,15 +8,15 @@ import org.http4k.core.with
 import org.http4k.lens.RequestContextLens
 import org.http4k.lens.WebForm
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
-import ru.yarsu.db.DataBaseController
 import ru.yarsu.web.domain.Permissions
 import ru.yarsu.web.domain.article.AgeRatingBook
+import ru.yarsu.web.domain.storage.AddonStorage
 import ru.yarsu.web.models.NewArticleVM
 
 class NewArticleHandler(
+    private val addon: AddonStorage,
     private val htmlView: ContextAwareViewRender,
     private val permissionsLens: RequestContextLens<Permissions>,
-    private val dataBaseController: DataBaseController,
 ) : HttpHandler {
     override fun invoke(request: Request): Response {
         if (!permissionsLens(request).manageArticle) {
@@ -26,8 +26,8 @@ class NewArticleHandler(
             NewArticleVM(
                 WebForm(),
                 AgeRatingBook.entries,
-                dataBaseController.getAllForms(),
-                dataBaseController.getAllGenres(),
+                addon.getAllForms(),
+                addon.getAllGenres(),
                 listOf(),
                 IntParams(-1, -1, -1),
             )

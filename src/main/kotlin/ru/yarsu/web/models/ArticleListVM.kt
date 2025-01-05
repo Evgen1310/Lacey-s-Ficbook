@@ -4,8 +4,10 @@ import org.http4k.template.ViewModel
 import ru.yarsu.web.domain.Paginator
 import ru.yarsu.web.domain.PebbleParams
 import ru.yarsu.web.domain.article.AgeRatingBook
+import ru.yarsu.web.domain.article.Article
 import ru.yarsu.web.domain.article.ArticleWithData
 import ru.yarsu.web.domain.article.Form
+import ru.yarsu.web.domain.storage.AddonStorage
 
 class ArticleListVM(
     val articles: List<ArticleWithData>,

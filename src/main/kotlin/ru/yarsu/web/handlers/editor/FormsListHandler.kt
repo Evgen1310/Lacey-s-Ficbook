@@ -9,19 +9,19 @@ import org.http4k.core.with
 import org.http4k.lens.Query
 import org.http4k.lens.int
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
-import ru.yarsu.db.DataBaseController
 import ru.yarsu.web.domain.Paginator
+import ru.yarsu.web.domain.storage.AddonStorage
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.models.FormsListVM
 
-class FormsListHandler(private val htmlView: ContextAwareViewRender, private val dataBaseController: DataBaseController) :
+class FormsListHandler(private val htmlView: ContextAwareViewRender, private val addonStorage: AddonStorage) :
     HttpHandler {
     private val pageLens = Query.int().required("page")
 
     override fun invoke(request: Request): Response {
         val page = lensOrDefault(pageLens, request, 0).takeIf { it > -1 } ?: 0
-        val forms = dataBaseController.formsByPageNumber(page)
-        val paginator = Paginator(page, dataBaseController.pageAmountFormOrGenre("form"), request.uri.removeQueries("page"))
+        val forms = addonStorage.formsByPageNumber(page)
+        val paginator = Paginator(page, addonStorage.pageAmount("form"), request.uri.removeQueries("page"))
         val viewModel = FormsListVM(forms, paginator)
         return Response(Status.OK).with(htmlView(request) of viewModel)
     }

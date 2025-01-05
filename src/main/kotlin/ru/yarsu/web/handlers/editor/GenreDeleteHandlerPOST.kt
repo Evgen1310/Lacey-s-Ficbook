@@ -6,22 +6,20 @@ import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.lens.Path
 import org.http4k.lens.int
-import ru.yarsu.db.DataBaseController
+import ru.yarsu.web.domain.storage.AddonStorage
 import ru.yarsu.web.funs.lensOrNull
 
-class GenreDeleteHandlerPOST(private val dataBaseController: DataBaseController) :
+class GenreDeleteHandlerPOST(private val addonStorage: AddonStorage) :
     HttpHandler {
     private val pathLens = Path.int().of("id")
-
     override fun invoke(request: Request): Response {
         lensOrNull(pathLens, request)
             ?.let { id ->
-                dataBaseController.getGenreById(id)
+                addonStorage.getGenreById(id)
                     .let { genre ->
-                        if (genre.genre == "Не определено") {
+                        if (genre == "Не определено")
                             return Response(Status.NOT_FOUND)
-                        }
-                        dataBaseController.removeGenre(id)
+                        addonStorage.removeGenre(id)
                         return Response(Status.FOUND).header("Location", "/redaction/genres")
                     }
             } ?: return Response(Status.NOT_FOUND)

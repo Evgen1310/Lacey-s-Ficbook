@@ -14,8 +14,8 @@ import org.http4k.lens.int
 import org.http4k.lens.nonBlankString
 import org.http4k.lens.webForm
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
-import ru.yarsu.db.DataBaseController
 import ru.yarsu.web.domain.RolesEnums
+import ru.yarsu.web.domain.storage.UserStorage
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.funs.lensOrNull
 import ru.yarsu.web.models.UserEditVM
@@ -23,8 +23,9 @@ import ru.yarsu.web.users.User
 
 class UserEditHandlerPOST(
     private val htmlView: ContextAwareViewRender,
-    private val dataBaseController: DataBaseController,
+    private val userStorage: UserStorage
 ) : HttpHandler {
+
     private val pathLens = Path.nonBlankString().of("id")
     private val nicknameField = FormField.nonBlankString().required("nickname")
     private val passwordField = FormField.nonBlankString().optional("password")
@@ -42,34 +43,31 @@ class UserEditHandlerPOST(
     override fun invoke(request: Request): Response {
         lensOrNull(pathLens, request)
             ?.let { login ->
-                dataBaseController.getUser(login)
+                userStorage.getUser(login)
                     ?.let { user ->
-                        if (RolesEnums.from(user.role) == RolesEnums.ADMIN) {
+                        if (RolesEnums.from(user.role) == RolesEnums.ADMIN)
                             return Response(Status.UNAUTHORIZED)
-                        }
-                        if (RolesEnums.from(user.role) == RolesEnums.BLOCKED) {
+                        if (RolesEnums.from(user.role) == RolesEnums.BLOCKED)
                             return Response(Status.FOUND).header("Location", "/users/${user.login}/unblock")
-                        }
                         val form = formLens(request)
                         val errors = checkErrors(form, user)
                         if (errors.isNotEmpty()) {
-                            val viewModel =
-                                UserEditVM(
-                                    form,
-                                    user,
-                                    RolesEnums.entries,
-                                    RolesEnums.from(lensOrDefault(roleField, form, -1)) ?: RolesEnums.AUTHOR,
-                                    errors,
-                                    errorString(errors),
-                                )
+                            val viewModel = UserEditVM(
+                                form,
+                                user,
+                                RolesEnums.entries,
+                                RolesEnums.from(lensOrDefault(roleField, form, -1)) ?: RolesEnums.AUTHOR,
+                                errors,
+                                errorString(errors),
+                            )
                             return Response(Status.OK).with(htmlView(request) of viewModel)
                         }
-                        dataBaseController.changeUser(
+                        userStorage.changeUser(
                             user,
                             nicknameField(form),
                             lensOrDefault(passwordField, form, ""),
                             lensOrDefault(aboutField, form, ""),
-                            roleField(form),
+                            roleField(form)
                         )
                         return Response(Status.FOUND).header("Location", "/users")
                     }
@@ -84,15 +82,11 @@ class UserEditHandlerPOST(
         return resultStr
     }
 
-    private fun checkErrors(
-        form: WebForm,
-        user: User,
-    ): List<String> {
+    private fun checkErrors(form: WebForm, user: User): List<String> {
         val errors = form.errors.map { it.meta.name }.toMutableList()
         val nickname = lensOrDefault(nicknameField, form, "")
-        if (dataBaseController.checkNickname(nickname, user.nickName)) {
+        if (userStorage.checkNickname(nickname, user.nickName))
             errors.add("nicknameExist")
-        }
         return errors
     }
 }
