@@ -63,7 +63,10 @@ class DataBaseController(
         session.transaction.commit()
     }
 
-    private fun getSortedArticlesSize(hql: String, params: Params): Int {
+    private fun getSortedArticlesSize(
+        hql: String,
+        params: Params,
+    ): Int {
         val countHql = "select count(*) $hql"
         val session = openSession()
         val query = session.createQuery(countHql, Long::class.java)

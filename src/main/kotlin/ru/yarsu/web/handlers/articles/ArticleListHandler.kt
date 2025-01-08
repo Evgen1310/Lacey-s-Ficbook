@@ -64,7 +64,7 @@ fun makeArticlesWithData(
 ): List<ArticleWithData> {
     val forms = dataBaseController.getAllForms()
     val genres = dataBaseController.getAllGenres()
-    val users = dataBaseController.getAllUsers().associateBy({it.login}, {it})
+    val users = dataBaseController.getAllUsers().associateBy({ it.login }, { it })
     val result = mutableListOf<ArticleWithData>()
     articles.forEach {
         val artData = dataBaseController.createArticleWithData(it, forms, genres, users[it.user])

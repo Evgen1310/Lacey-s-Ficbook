@@ -31,7 +31,16 @@ class ArticleHandler(
             ?.let { entity ->
                 val page = lensOrDefault(pageLens, request, 0).takeIf { it > -1 } ?: 0
                 val chapters = dataBaseController.getChaptersByIds(entity.chapters)
-                val chapter = if (chapters.isEmpty()) Chapter(chapter = 0, name = "На данный момент глав нет", content = "") else chapters[page]
+                val chapter =
+                    if (chapters.isEmpty()) {
+                        Chapter(
+                            chapter = 0,
+                            name = "На данный момент глав нет",
+                            content = "",
+                        )
+                    } else {
+                        chapters[page]
+                    }
                 val paginator = Paginator(page, entity.chapters.size, request.uri.removeQueries("page"))
                 return Response(OK).with(
                     htmlView(request) of
