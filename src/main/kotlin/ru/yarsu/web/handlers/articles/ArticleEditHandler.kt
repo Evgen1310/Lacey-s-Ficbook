@@ -61,7 +61,7 @@ class ArticleEditHandler(
                             annotationField of entity.annotation,
 //                            authorField of addon.getAuthorById(entity.author).name,
 //                            aboutField of addon.getAuthorById(entity.author).description,
-                            tagsOldField of dataBaseController.getTagsByIds(entity.tagsArt),
+                            tagsOldField of dataBaseController.getTagsByIds(entity.tagsArt).map { it.tag },
                             chaptersOldField of chapters.map { it.chapter },
                             namesOldField of chapters.map { it.name },
                             textsOldField of chapters.map { it.content },

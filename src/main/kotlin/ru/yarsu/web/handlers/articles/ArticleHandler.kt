@@ -50,7 +50,7 @@ class ArticleHandler(
                                 listOf(entity),
                                 dataBaseController,
                             )[0],
-                            dataBaseController.getTagsByIds(entity.tagsArt),
+                            dataBaseController.getTagsByIds(entity.tagsArt).map { it.tag },
                             chapter,
                             dataBaseController.getChaptersByIds(entity.chapters),
                             paginator,

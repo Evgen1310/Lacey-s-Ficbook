@@ -38,7 +38,7 @@ class ArticleDeleteHandler(
                 val viewModel =
                     ArticleDeleteVM(
                         makeArticlesWithData(login, listOf(entity), dataBaseController)[0],
-                        dataBaseController.getTagsByIds(entity.tagsArt),
+                        dataBaseController.getTagsByIds(entity.tagsArt).map { it.tag },
                     )
                 return Response(Status.OK).with(htmlView(request) of viewModel)
             } ?: return Response(NOT_FOUND)

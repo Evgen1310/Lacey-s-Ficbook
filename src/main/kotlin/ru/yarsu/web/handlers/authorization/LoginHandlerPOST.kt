@@ -79,7 +79,7 @@ class LoginHandlerPOST(
 
     private fun checkErrors(form: WebForm): List<String> {
         val errors = form.errors.map { it.meta.name }.toMutableList()
-        val user = dataBaseController.getUser(lensOrDefault(loginField, form, ""))
+        val user = dataBaseController.getUserByLogin(lensOrDefault(loginField, form, ""))
         user?.let {
             if (!dataBaseController.checkPassword(lensOrDefault(passwordField, form, ""), user.password)) {
                 errors.add("incorrect")

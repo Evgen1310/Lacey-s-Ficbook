@@ -19,7 +19,7 @@ fun getUserFilter(
             val cookie = request.cookie("auth")
             val userNick = cookie?.let { jwtTools.checkToken(it.value) }
             userNick?.let { nick ->
-                dataBaseController.getUser(nick)?.let { user ->
+                dataBaseController.getUserByLogin(nick)?.let { user ->
                     next(request.with(userLens of user))
                 }
             } ?: next(request)

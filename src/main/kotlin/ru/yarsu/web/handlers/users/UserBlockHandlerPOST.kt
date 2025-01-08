@@ -17,12 +17,12 @@ class UserBlockHandlerPOST(private val dataBaseController: DataBaseController) :
     override fun invoke(request: Request): Response {
         lensOrNull(pathLens, request)
             ?.let { login ->
-                dataBaseController.getUser(login)
+                dataBaseController.getUserByLogin(login)
                     ?.let { user ->
                         if (RolesEnums.from(user.role) == RolesEnums.ADMIN) {
                             return Response(Status.UNAUTHORIZED)
                         }
-                        dataBaseController.changeUserRole(user, RolesEnums.BLOCKED.id)
+                        dataBaseController.changeUserRole(user.id, RolesEnums.BLOCKED.id)
                         return Response(Status.FOUND).header("Location", "/users")
                     }
             } ?: return Response(Status.NOT_FOUND)

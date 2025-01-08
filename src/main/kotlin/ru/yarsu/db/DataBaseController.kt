@@ -154,15 +154,6 @@ class DataBaseController(
         return ceil(size.toDouble() / INPAGE_ARTICLE).toInt()
     }
 
-    fun articlesByPageNumber(page: Int): List<Article> {
-        val hql = "from Article order by dateAdd desc"
-        val session = openSession()
-        val query = session.createQuery(hql, Article::class.java)
-        query.setFirstResult(INPAGE_ARTICLE * page)
-        query.setMaxResults(INPAGE_ARTICLE)
-        return query.list()
-    }
-
     fun createArticleWithData(
         article: Article,
         forms: List<Form>,
@@ -310,29 +301,48 @@ class DataBaseController(
         return newGenre.id
     }
 
-    fun getTagsByIds(ids: List<Int>): List<String> {
-        val hql = "select tag from Tag where id in :ids"
+    fun getTagsByIds(ids: List<Int>): List<Tag> {
+        val hql = "from Tag where id in :ids"
         val session = openSession()
-        val query = session.createQuery(hql, String::class.java)
+        val query = session.createQuery(hql, Tag::class.java)
         query.setParameter("ids", ids)
         return query.list()
     }
 
-    fun addTag(tag: String): Int {
+    private fun checkTag(tag: String): Int? {
+        val hql = "from Tag where tag = :tag"
         val session = openSession()
-        session.beginTransaction()
-        val newTag = Tag(tag = tag)
-        session.persist(newTag)
-        session.transaction.commit()
-        return newTag.idTag
+        val query = session.createQuery(hql, Tag::class.java)
+        query.setParameter("tag", tag)
+        val list = query.list()
+        for (tmp in list) {
+            if (tmp.tag == tag) {
+                return tmp.idTag
+            }
+        }
+        return null
     }
 
-    fun getAllTags(): List<Tag> {
-        val hql = "from Tag"
+    fun addTag(tag: String): Int {
+        val check = checkTag(tag)
+        if (check == null) {
+            val session = openSession()
+            session.beginTransaction()
+            val newTag = Tag(tag = tag)
+            session.persist(newTag)
+            session.transaction.commit()
+            return newTag.idTag
+        } else return check
+    }
+
+    fun deleteTag(tag: String) {
+        val hql = "delete Tag where tag = :tag"
         val session = openSession()
         session.beginTransaction()
-        val query = session.createQuery(hql, Tag::class.java)
-        return query.list()
+        val query = session.createMutationQuery(hql)
+        query.setParameter("tag", tag)
+        query.executeUpdate()
+        session.transaction.commit()
     }
 
     fun prepareTags(
@@ -344,10 +354,10 @@ class DataBaseController(
             if (i == "") {
                 continue
             }
-            tags.add(addTag(i).toInt())
+            tags.add(addTag(i))
         }
         if (tagsNewField != "") {
-            tags.add(addTag(tagsNewField).toInt())
+            tags.add(addTag(tagsNewField))
         }
         return tags
     }
@@ -451,7 +461,7 @@ class DataBaseController(
         return query.list()
     }
 
-    fun getUser(login: String): User? {
+    fun getUserByLogin(login: String): User? {
         val hql = "from User where login = :login"
         val session = openSession()
         val query = session.createQuery(hql, User::class.java)
@@ -459,19 +469,27 @@ class DataBaseController(
         return query.resultStream.findFirst().orElse(null)
     }
 
+    fun getUserById(id: Int): User? {
+        val hql = "from User where id = :id"
+        val session = openSession()
+        val query = session.createQuery(hql, User::class.java)
+        query.setParameter("id", id)
+        return query.resultStream.findFirst().orElse(null)
+    }
+
     fun changeUserRole(
-        user: User,
+        id: Int,
         roleNew: Int,
     ) {
         val session = openSession()
         session.beginTransaction()
-        val userChanged = session.get(User::class.java, user.id)
+        val userChanged = session.get(User::class.java, id)
         userChanged.role = roleNew
         session.transaction.commit()
     }
 
     fun changeUser(
-        user: User,
+        id: Int,
         nicknameNew: String,
         passwordNew: String,
         aboutNew: String,
@@ -479,7 +497,7 @@ class DataBaseController(
     ) {
         val session = openSession()
         session.beginTransaction()
-        val userChanged = session.get(User::class.java, user.id)
+        val userChanged = session.get(User::class.java, id)
         userChanged.role = roleNew
         userChanged.nickName = nicknameNew
         userChanged.password = createPassword(passwordNew)
@@ -511,10 +529,21 @@ class DataBaseController(
         return commaFormat.formatHex(digest)
     }
 
-    fun addUser(user: User) {
+    fun addUser(user: User): Int {
         val session = openSession()
         session.beginTransaction()
-        session.merge(user)
+        val userPersisted = session.merge(user)
+        session.transaction.commit()
+        return userPersisted.id
+    }
+
+    fun deleteUser(login: String) {
+        val hql = "delete User where login = :login"
+        val session = openSession()
+        session.beginTransaction()
+        val query = session.createMutationQuery(hql)
+        query.setParameter("login", login)
+        query.executeUpdate()
         session.transaction.commit()
     }
 

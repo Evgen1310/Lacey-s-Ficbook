@@ -20,7 +20,7 @@ class UserUnBlockHandler(private val htmlView: ContextAwareViewRender, private v
     override fun invoke(request: Request): Response {
         lensOrNull(pathLens, request)
             ?.let { login ->
-                dataBaseController.getUser(login)
+                dataBaseController.getUserByLogin(login)
                     ?.let { user ->
                         if (RolesEnums.from(user.role) == RolesEnums.ADMIN) {
                             return Response(Status.UNAUTHORIZED)

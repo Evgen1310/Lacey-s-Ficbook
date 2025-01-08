@@ -42,7 +42,7 @@ class UserEditHandlerPOST(
     override fun invoke(request: Request): Response {
         lensOrNull(pathLens, request)
             ?.let { login ->
-                dataBaseController.getUser(login)
+                dataBaseController.getUserByLogin(login)
                     ?.let { user ->
                         if (RolesEnums.from(user.role) == RolesEnums.ADMIN) {
                             return Response(Status.UNAUTHORIZED)
@@ -65,7 +65,7 @@ class UserEditHandlerPOST(
                             return Response(Status.OK).with(htmlView(request) of viewModel)
                         }
                         dataBaseController.changeUser(
-                            user,
+                            user.id,
                             nicknameField(form),
                             lensOrDefault(passwordField, form, ""),
                             lensOrDefault(aboutField, form, ""),
