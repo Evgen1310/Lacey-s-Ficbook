@@ -1,83 +1,188 @@
 package ru.yarsu.web.domain.storage
 
-import org.http4k.lens.FormField
-import org.http4k.lens.WebForm
-import org.http4k.lens.int
-import org.http4k.lens.nonBlankString
 import ru.yarsu.web.domain.Params
 import ru.yarsu.web.domain.article.Article
-import ru.yarsu.web.funs.lensOrDefault
 import kotlin.math.ceil
 
 const val INPAGE = 10
 
-class ArticleStorage(private var articles: List<Article>) {
-    private val idAndArticle: MutableMap<Int, Article> = articles.associateBy({ it.id }, { it }).toMutableMap()
-    private val ids: MutableSet<Int> = articles.map { it.id }.toMutableSet()
-    private val articlesSize = idAndArticle.size
+class ArticleStorage(articles: List<Article>) {
+    private var articlesMap: Map<Int, Article> = articles.associateBy({ it.id }, { it })
 
-    fun getAllArticles(): List<Article> = idAndArticle.map { it.value }
+    /*!
+    Тип: действие
+    Функция по получению статьи из хранилища по её ID
+    Оперирует: строение ArticleStorage
+     */
+    fun getArticleFromStorage(id: Int): Article? = articlesMap[id]
 
-    fun getArticleId(id: Int): Article? = idAndArticle[id]
+    /*!
+    Тип: действие
+    Функция по получению всех статей из хранилища
+    Оперирует: строение ArticleStorage
+     */
+    fun getAllArticles() = articlesMap.values.toList()
 
+    /*!
+    Тип: действие
+    Функция по удалению статьи из хранилища.
+    Является обёрткой для removeArticleAndGetStorage()
+    Оперирует: строение ArticleStorage
+     */
     fun deleteArticle(id: Int) {
-        idAndArticle.remove(id)
-        ids.remove(id)
+        articlesMap = removeArticleAndGetStorage(id, articlesMap)
     }
 
-    fun sortArticles(params: Params): List<Article> {
-        var sorted = idAndArticle.map { it.value }
-        sorted = sorted.sortedWith { o1, o2 -> o1.dateAdd.compareTo(o2.dateAdd) }
+    /*!
+    Функция по удалению статьи из предложенной коллекции
+    Оперирует: бизнес-логика
+     */
+    fun removeArticleAndGetStorage(id: Int, storage: Map<Int, Article>) =
+        storage - id
+
+    /*!
+    Тип: действие
+    Функция по сортировке и фильтрации статей из хранилища.
+    Является обёрткой для sortAndFilterArticles()
+    Оперирует: строение ArticleStorage
+     */
+    fun sortAndFilterArticlesFromStorage(params: Params): List<Article> {
+        var result = getAllArticles()
+        result = sortAndFilterArticles(result, params)
+        return result
+    }
+
+    /*!
+    Тип: вычисление
+    Функция по сортировке и фильтрации предложенной коллекции статей
+    Оперирует: ?
+     */
+    fun sortAndFilterArticles(articles: List<Article>, params: Params): List<Article> {
+        var result = sortArticlesByDate(articles)
         if (params.error) {
-            return sorted
+            return result
         }
-        params.ageParams.isNotEmpty()
-            .let { if (it) sorted = sorted.filter { art -> params.ageParams.contains(art.censorAge) } }
-        params.formParams.isNotEmpty()
-            .let { if (it) sorted = sorted.filter { art -> params.formParams.contains(art.formArt) } }
-        return sorted
+        result = filterArticlesByAge(result, params.ageParams)
+        result = filterArticlesByForm(result, params.formParams)
+        return result
     }
 
-    fun newId(): Int {
-        var id = articlesSize
+    /*!
+    Тип: вычисление
+    Функция по сортировке предложенной коллекции статей по свежести дат
+    Оперирует: строение Article
+     */
+    fun sortArticlesByDate(articles: List<Article>): List<Article> {
+        return articles.sortedWith { o1, o2 -> o1.dateAdd.compareTo(o2.dateAdd) }
+    }
+
+    /*!
+    Тип: вычисление
+    Функция по фильтрации предложенной коллекции статей по ID возрастных ограничений
+    Оперирует: строение Article
+     */
+    fun filterArticlesByAge(articles: List<Article>, ageParams: List<Int>): List<Article> {
+        return if (ageParams.isEmpty()) {
+            articles
+        } else {
+            articles.filter { ageParams.contains(it.censorAge) }
+        }
+    }
+
+    /*!
+    Тип: вычисление
+    Функция по фильтрации предложенной коллекции статей по ID форм
+    Оперирует: строение Article
+     */
+    fun filterArticlesByForm(articles: List<Article>, formParams: List<Int>): List<Article> {
+        return if (formParams.isEmpty()) {
+            articles
+        } else {
+            articles.filter { formParams.contains(it.formArt) }
+        }
+    }
+
+    /*!
+    Тип: действие
+    Функция по получению свободного ID среди статей хранилища
+    Оперирует: строение ArticleStorage
+     */
+    fun newIdForStorage(): Int {
+        return newIdForCollection(getAllArticles())
+    }
+
+    /*!
+    Тип: вычисление
+    Функция по получению свободного ID среди предложенной коллекции
+    Оперирует: бизнес-логика
+     */
+    fun newIdForCollection(articles: List<Article>): Int {
+        val ids = articles.map { it.id }.toSet()
+        var id = ids.maxOrNull()?.plus(1) ?: 1
         while (id in ids)
             id += 1
         return id
     }
 
-    fun addArticle(article: Article): Int {
-        idAndArticle[article.id] = article
-        ids.add(article.id)
+    /*!
+    Тип: действие
+    Функция по добавлению объекта Article в хранилище.
+    Является обёрткой для addArticleAndGetStorage()
+    Оперирует: структура ArticleStorage
+     */
+    fun addArticleToStorage(article: Article): Int {
+        articlesMap = addArticleAndGetStorage(article, articlesMap)
         return article.id
     }
 
-    fun pageAmount(sorted: List<Article>): Int {
-        return ceil(sorted.size.toDouble() / INPAGE).toInt()
+    /*!
+    Тип: вычисление
+    Функция по добавлению объекта Article в предложенную коллекцию
+    Оперирует: ?
+     */
+    fun addArticleAndGetStorage(article: Article, storage: Map<Int, Article>) =
+        storage + (article.id to article)
+
+    /*!
+    Тип: вычисление
+    Функция по расчёту количества страниц для предложенной коллекции
+    Оперирует: бизнес-логика
+     */
+    fun pageAmount(articles: List<Article>): Int {
+        return ceil(articles.size.toDouble() / INPAGE).toInt()
     }
 
+    /*!
+    Тип: вычисление
+    Функция по получению списка статей по заданному номеру страницы из предложенной коллекции
+    Оперирует: бизнес-логика
+     */
     fun articlesByPageNumber(
         pageNumber: Int,
-        sorted: List<Article>,
+        articles: List<Article>,
     ): List<Article> {
         val resultList = mutableListOf<Article>()
         for (i in 0..<INPAGE) {
-            if (i + pageNumber * INPAGE < sorted.size) {
-                resultList.add(sorted[i + pageNumber * INPAGE])
+            if (i + pageNumber * INPAGE < articles.size) {
+                resultList.add(articles[i + pageNumber * INPAGE])
             }
         }
         return resultList
     }
 
-    fun prepareArticle(
+    /*!
+    Тип: вычисление
+    Функция по добавлению списка тэгов и глав в предложенный объект Article
+    Оперирует: строение Article
+     */
+    fun addTagsAndChaptersToArticle(
         articleToDo: Article,
         tags: List<Int>,
         chapters: List<Int>,
-    ): Int {
-        return addArticle(
-            articleToDo.copy(
-                tagsArt = tags,
-                chapters = chapters
-            )
+    ): Article {
+        return articleToDo.copy(
+            tagsArt = tags,
+            chapters = chapters
         )
     }
 }

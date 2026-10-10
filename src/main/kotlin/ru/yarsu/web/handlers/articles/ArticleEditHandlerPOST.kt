@@ -72,7 +72,7 @@ class ArticleEditHandlerPOST(
         val permissions = permissionsLens(request)
         val login = userLens(request)?.login ?: ""
         lensOrNull(pathLens, request)
-            ?.let { id -> storage.getArticleId(id) }
+            ?.let { id -> storage.getArticleFromStorage(id) }
             ?.let { entity ->
                 if (!permissions.manageAllArticles) {
                     if (!(permissions.manageArticle && entity.user == login)) {
@@ -128,7 +128,7 @@ class ArticleEditHandlerPOST(
                     lensOrDefault(tagsOldField, form, listOf()),
                     lensOrDefault(tagsNewField, form, ""),
                 )
-                val articleToDo = Article(
+                var articleToDo = Article(
                     entity.dateAdd,
                     nameField(form),
                     lensOrDefault(ageField, form, -1),
@@ -140,7 +140,8 @@ class ArticleEditHandlerPOST(
                     entity.id,
                     login,
                 )
-                val id = storage.prepareArticle(articleToDo, tags, chapters)
+                articleToDo = storage.addTagsAndChaptersToArticle(articleToDo, tags, chapters)
+                val id = storage.addArticleToStorage(articleToDo)
                 return Response(Status.FOUND).header("Location", "/articles/$id")
             } ?: return Response(NOT_FOUND)
     }

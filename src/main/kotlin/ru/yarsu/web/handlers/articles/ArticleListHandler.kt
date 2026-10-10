@@ -46,7 +46,7 @@ class ArticleListHandler(
         val ages = lensOrNull(ageLens, request)
         val forms = lensOrNull(formLens, request)
         val params = prepareParamsss(ages, forms, uri)
-        val sorted = articles.sortArticles(params)
+        val sorted = articles.sortAndFilterArticlesFromStorage(params)
         val paginator = Paginator(page, articles.pageAmount(sorted), uri.removeQueries("page"))
         val viewModel =
             ArticleListVM(

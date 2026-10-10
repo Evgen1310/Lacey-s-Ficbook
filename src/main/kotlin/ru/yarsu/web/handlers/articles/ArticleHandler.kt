@@ -30,7 +30,7 @@ class ArticleHandler(
     override fun invoke(request: Request): Response {
         val login = lensOrNull(userLens, request)?.login ?: ""
         lensOrNull(pathLens, request)
-            ?.let { id -> storage.getArticleId(id) }
+            ?.let { id -> storage.getArticleFromStorage(id) }
             ?.let { entity ->
                 val page = lensOrDefault(pageLens, request, 0).takeIf { it > -1 } ?: 0
                 val chapter = addon.getChaptersByIds(entity.chapters)[page]

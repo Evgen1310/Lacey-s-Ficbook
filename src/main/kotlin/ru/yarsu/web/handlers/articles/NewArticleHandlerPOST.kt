@@ -71,8 +71,8 @@ class NewArticleHandlerPOST(
                 )
             return Response(Status.OK).with(htmlView(request) of viewModel)
         }
-        val id = storage.newId()
-        storage.addArticle(
+        val id = storage.newIdForStorage()
+        storage.addArticleToStorage(
             Article(
                 LocalDateTime.now(),
                 nameField(form),

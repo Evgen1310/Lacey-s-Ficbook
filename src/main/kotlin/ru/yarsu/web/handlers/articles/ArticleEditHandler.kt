@@ -44,7 +44,7 @@ class ArticleEditHandler(
         val permissions = permissionsLens(request)
         val login = userLens(request)?.login
         lensOrNull(pathLens, request)
-            ?.let { id -> storage.getArticleId(id) }
+            ?.let { id -> storage.getArticleFromStorage(id) }
             ?.let { entity ->
                 if (!permissions.manageAllArticles) {
                     if (!(permissions.manageArticle && entity.user == login)) {
