@@ -1,18 +1,15 @@
 package ru.yarsu.web.domain.storage
 
 import ru.yarsu.web.domain.RolesEnums
-import ru.yarsu.web.domain.article.Article
 import ru.yarsu.web.users.User
 import ru.yarsu.web.users.UserInfo
 import ru.yarsu.web.users.UserWithData
-import java.security.MessageDigest
 import java.time.LocalDateTime
-import java.util.HexFormat
 import kotlin.math.ceil
 
 class UserStorage(
     private val users: List<User>,
-    private val authSalt: String,
+    private val passwordHandler: PasswordHandler
 ) {
     private val usersMap: MutableMap<String, User> = users.associateBy({ it.login }, { it }).toMutableMap()
     private val logins: MutableSet<String> = users.map { it.login }.toMutableSet()
@@ -28,7 +25,7 @@ class UserStorage(
         nicknames.remove(user.nickName)
         var password = user.password
         if (passwordNew != "")
-            password = createPassword(passwordNew)
+            password = passwordHandler.createPassword(passwordNew)
         usersMap[user.login] =
             user.copy(
                 nickName = nicknameNew,
@@ -48,19 +45,11 @@ class UserStorage(
         return User(
             nickname,
             login,
-            createPassword(password),
+            passwordHandler.createPassword(password),
             about,
             LocalDateTime.now(),
             RolesEnums.AUTHOR.id,
         )
-    }
-
-    private fun createPassword(password: String): String {
-        val commaFormat = HexFormat.of()
-        val saltedBytes = (password + authSalt).toByteArray(charset("UTF-8"))
-        val messageDigest = MessageDigest.getInstance("SHA-256")
-        val digest = messageDigest.digest(saltedBytes)
-        return commaFormat.formatHex(digest)
     }
 
     fun addUser(user: User) {
@@ -81,11 +70,6 @@ class UserStorage(
         newNicknames.remove(ignore)
         return nickname in newNicknames
     }
-
-    fun checkPassword(
-        passwordIn: String,
-        passwordOld: String,
-    ) = createPassword(passwordIn) == passwordOld
 
     fun getAllUsers() = usersMap.map { it.value }
 
