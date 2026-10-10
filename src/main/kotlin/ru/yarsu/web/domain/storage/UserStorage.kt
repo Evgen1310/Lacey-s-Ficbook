@@ -13,8 +13,6 @@ class UserStorage(
     val passwordHandler: PasswordHandler
 ) {
     private var usersMap: Map<String, User> = users.associateBy({ it.login }, { it })
-    private var logins: Set<String> = users.map { it.login }.toSet()
-    private var nicknames: Set<String> = users.map { it.nickName }.toSet()
 
     /*!
     Тип: действие (вызывает действие)
@@ -49,8 +47,6 @@ class UserStorage(
      */
     fun addUserToStorage(user: User) {
         usersMap = addUserAndGetStorage(user, usersMap)
-        logins = addLoginAndGetStorage(user.login, logins)
-        nicknames = addNicknameAndGetStorage(user.nickName, nicknames)
     }
 
     /*!
@@ -62,32 +58,18 @@ class UserStorage(
         usersCollection + (user.login to user)
 
     /*!
-    Тип: вычисление
-    Функция по добавлению логина в подаваемую коллекцию
-    Оперирует: бизнес-логика
+    Тип: действие
+    Функция по получению всех занятых никнеймов у пользователей из хранилища
+    Оперирует: структура UserStorage
      */
-    fun addLoginAndGetStorage(login: String, loginCollection: Set<String>) =
-        loginCollection + login
+    fun getAllNicknames() = usersMap.values.map { it.nickName }.toSet()
 
     /*!
-    Тип: вычисление
-    Функция по добавлению никнейма в подаваемую коллекцию
-    Оперирует: бизнес-логика
+    Тип: действие
+    Функция по получению всех занятых логинов у пользователей из хранилища
+    Оперирует: структура UserStorage
      */
-    fun addNicknameAndGetStorage(nickname: String, nicknamesCollection: Set<String>) =
-        nicknamesCollection + nickname
-
-    /*!
-    Тип: вычисление
-    Функция по удалению старого никнейма пользователя из подаваемой коллекции при смене никнейма
-    Оперирует: бизнес-логика
-     */
-    fun removeFromNicknamesIfNewAndGetCollection(nicknameOld: String, nicknameNew: String, nicknamesCollection: Set<String>) =
-        if (nicknameOld != nicknameNew) {
-            nicknamesCollection - nicknameOld
-        }  else {
-            nicknamesCollection
-        }
+    fun getAllLogins() = usersMap.keys
 
     /*!
     Тип: действие (вызывает действие)
@@ -97,7 +79,6 @@ class UserStorage(
     fun changeUser(user: User, nickname: String, password: String, about: String, role: Int) {
         val passwordNew = passwordHandler.createNewPasswordOrReturnOld(password, user.password)
         val updatedUser = createCopyOfUser(user, nickname, passwordNew, about, role)
-        nicknames = removeFromNicknamesIfNewAndGetCollection(user.nickName, updatedUser.nickName, nicknames)
         addUserToStorage(updatedUser)
     }
 
@@ -169,7 +150,7 @@ class UserStorage(
     Оперирует: строение UserStorage
      */
     fun checkLoginInStorage(login: String?): Boolean {
-        return checkLogin(login, logins)
+        return checkLogin(login, getAllLogins())
     }
 
     /*!
@@ -188,7 +169,7 @@ class UserStorage(
     Оперирует: строение UserStorage
      */
     fun checkNicknameInStorage(nickname: String?, ignore: String? = null): Boolean {
-        return checkNickname(nickname, ignore, nicknames)
+        return checkNickname(nickname, ignore, getAllNicknames())
     }
 
     /*!
