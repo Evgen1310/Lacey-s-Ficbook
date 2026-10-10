@@ -20,7 +20,7 @@ class UserStorage(
     Тип: действие (вызывает действие)
     Функция по получению пользователя по его логину.
     Является обёрткой к getUserFromStorage()
-    Оперирует: строение User
+    Оперирует: строение UserStorage
      */
     fun getUser(login: String): User? = getUserFromStorage(login)
 
@@ -54,12 +54,25 @@ class UserStorage(
     }
 
     /*!
+    Тип: действие
+    Функция по удалению старого никнейма пользователя из коллекции при смене никнейма
+    Оперирует: строение User
+     */
+    fun removeFromNicknamesIfNew(nicknameOld: String, nicknameNew: String) {
+        if (nicknameOld != nicknameNew) {
+            nicknames = nicknames - nicknameOld
+        }
+    }
+
+    /*!
     Тип: действие (вызывает действие)
     Функция по обновлению данных пользователя в хранилище
     Оперирует: строение User, строение UserStorage (транзитивно)
      */
     fun changeUser(user: User, nickname: String, password: String, about: String, role: Int) {
-        val updatedUser = createCopyOfUser(user, nickname, password, about, role)
+        val passwordNew = passwordHandler.createNewPasswordOrReturnOld(password, user.password)
+        val updatedUser = createCopyOfUser(user, nickname, passwordNew, about, role)
+        removeFromNicknamesIfNew(user.nickName, updatedUser.nickName)
         addUserToStorage(updatedUser)
     }
 
@@ -69,10 +82,9 @@ class UserStorage(
     Оперирует: строение User
      */
     fun createCopyOfUser(user: User, nickname: String, password: String, about: String, role: Int): User {
-        val passwordNew = passwordHandler.createNewPasswordOrReturnOld(password, user.password)
         return user.copy(
             nickName = nickname,
-            password = passwordNew,
+            password = password,
             about = about,
             role = role,
         )
@@ -102,7 +114,7 @@ class UserStorage(
     }
 
     /*!
-    Тип: вычисление, конструктор
+    Тип: действие, конструктор
     Функция по созданию объекта User с созданием пароля.
     Является обёрткой для createUser()
     Оперирует: строение UserStorage (passwordHandler)
@@ -160,7 +172,7 @@ class UserStorage(
     Оперирует: бизнес-правило
      */
     fun checkNickname(nickname: String?, ignore: String? = null, nicksCollection: Collection<String>): Boolean {
-        return nickname == ignore || nickname != null && nickname in nicksCollection
+        return (nickname != null) && (nickname != ignore) && (nickname in nicksCollection)
     }
 
     /*!
@@ -171,18 +183,18 @@ class UserStorage(
      */
     fun getUserInfo(login: String): UserInfo {
         val user = usersMap[login]
-        return createUserInfo(user)
+        return createUserInfo(user?.nickName, user?.about)
     }
 
     /*!
     Тип: вычисление, конструктор
     Функция по созданию объекта UserInfo из объекта User
-    Оперирует: строение User, строение UserInfo
+    Оперирует: строение UserInfo
      */
-    fun createUserInfo(user: User?): UserInfo {
+    fun createUserInfo(nickname: String?, about: String?): UserInfo {
         return UserInfo(
-            user?.nickName ?: "",
-            user?.about ?: "Ошибка. Обратитесь к администратору.",
+            nickname ?: "",
+            about ?: "Ошибка. Обратитесь к администратору.",
         )
     }
 
@@ -190,7 +202,7 @@ class UserStorage(
     Тип: вычисление
     Функция по созданию коллекции объектов UserWithData из коллекции объектов User
     Оболочка для createUserWithData()
-    Оперирует: ?
+    Оперирует: строение UserWithData
      */
     fun makeUsersWithData(users: List<User>): List<UserWithData> {
         val usersWithData = mutableListOf<UserWithData>()
