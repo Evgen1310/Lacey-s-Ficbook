@@ -48,21 +48,46 @@ class UserStorage(
     Оперирует: строение UserStorage
      */
     fun addUserToStorage(user: User) {
-        usersMap = usersMap + (user.login to user)
-        logins = logins + user.login
-        nicknames = nicknames + user.nickName
+        usersMap = addUserAndGetStorage(user, usersMap)
+        logins = addLoginAndGetStorage(user.login, logins)
+        nicknames = addNicknameAndGetStorage(user.nickName, nicknames)
     }
 
     /*!
-    Тип: действие
-    Функция по удалению старого никнейма пользователя из коллекции при смене никнейма
-    Оперирует: строение User
+    Тип: вычисление
+    Функция по добавлению объекта User в подаваемую коллекцию
+    Оперирует: бизнес-логика
      */
-    fun removeFromNicknamesIfNew(nicknameOld: String, nicknameNew: String) {
+    fun addUserAndGetStorage(user: User, usersCollection: Map<String, User>) =
+        usersCollection + (user.login to user)
+
+    /*!
+    Тип: вычисление
+    Функция по добавлению логина в подаваемую коллекцию
+    Оперирует: бизнес-логика
+     */
+    fun addLoginAndGetStorage(login: String, loginCollection: Set<String>) =
+        loginCollection + login
+
+    /*!
+    Тип: вычисление
+    Функция по добавлению никнейма в подаваемую коллекцию
+    Оперирует: бизнес-логика
+     */
+    fun addNicknameAndGetStorage(nickname: String, nicknamesCollection: Set<String>) =
+        nicknamesCollection + nickname
+
+    /*!
+    Тип: вычисление
+    Функция по удалению старого никнейма пользователя из подаваемой коллекции при смене никнейма
+    Оперирует: бизнес-логика
+     */
+    fun removeFromNicknamesIfNewAndGetCollection(nicknameOld: String, nicknameNew: String, nicknamesCollection: Set<String>) =
         if (nicknameOld != nicknameNew) {
-            nicknames = nicknames - nicknameOld
+            nicknamesCollection - nicknameOld
+        }  else {
+            nicknamesCollection
         }
-    }
 
     /*!
     Тип: действие (вызывает действие)
@@ -72,7 +97,7 @@ class UserStorage(
     fun changeUser(user: User, nickname: String, password: String, about: String, role: Int) {
         val passwordNew = passwordHandler.createNewPasswordOrReturnOld(password, user.password)
         val updatedUser = createCopyOfUser(user, nickname, passwordNew, about, role)
-        removeFromNicknamesIfNew(user.nickName, updatedUser.nickName)
+        nicknames = removeFromNicknamesIfNewAndGetCollection(user.nickName, updatedUser.nickName, nicknames)
         addUserToStorage(updatedUser)
     }
 
@@ -182,7 +207,7 @@ class UserStorage(
     Оперирует: строение User, строение UserStorage
      */
     fun getUserInfo(login: String): UserInfo {
-        val user = usersMap[login]
+        val user = getUserFromStorage(login)
         return createUserInfo(user?.nickName, user?.about)
     }
 
