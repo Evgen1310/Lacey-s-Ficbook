@@ -81,7 +81,7 @@ class LoginHandlerPOST(
         val errors = form.errors.map { it.meta.name }.toMutableList()
         val user = userStorage.getUser(lensOrDefault(loginField, form, ""))
         user?.let {
-            if (!userStorage.checkPassword(lensOrDefault(passwordField, form, ""), user.password)) {
+            if (!userStorage.passwordHandler.checkPassword(lensOrDefault(passwordField, form, ""), user.password)) {
                 errors.add("incorrect")
             }
         } ?: errors.add("incorrect")

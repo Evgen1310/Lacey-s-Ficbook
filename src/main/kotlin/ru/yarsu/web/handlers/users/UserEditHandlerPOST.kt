@@ -84,8 +84,8 @@ class UserEditHandlerPOST(
 
     private fun checkErrors(form: WebForm, user: User): List<String> {
         val errors = form.errors.map { it.meta.name }.toMutableList()
-        val nickname = lensOrDefault(nicknameField, form, "")
-        if (userStorage.checkNickname(nickname, user.nickName))
+        val nickname = lensOrNull(nicknameField, form)
+        if (userStorage.checkNicknameInStorage(nickname, user.nickName))
             errors.add("nicknameExist")
         return errors
     }

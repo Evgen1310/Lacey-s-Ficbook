@@ -14,6 +14,14 @@ class PasswordHandler(
         return commaFormat.formatHex(digest)
     }
 
+    fun createNewPasswordOrReturnOld(passwordNew: String, passwordOld: String): String {
+        return if (passwordNew.isNotBlank()) {
+            createPassword(passwordNew)
+        } else {
+            passwordOld
+        }
+    }
+
     fun checkPassword(
         passwordIn: String,
         passwordOld: String,

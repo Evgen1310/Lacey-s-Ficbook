@@ -16,6 +16,7 @@ import ru.yarsu.web.domain.storage.UserStorage
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.funs.lensOrNull
 import ru.yarsu.web.models.RegisterVM
+import java.time.LocalDateTime
 
 class RegisterHandlerPOST(
     private val htmlView: ContextAwareViewRender,
@@ -51,13 +52,14 @@ class RegisterHandlerPOST(
             return Response(Status.OK).with(htmlView(request) of viewModel)
         }
         val user =
-            userStorage.createUser(
+            userStorage.createUserWithPassword(
+                nicknameField(form),
                 loginField(form),
                 passwordInitField(form),
-                nicknameField(form),
                 lensOrDefault(aboutField, form, ""),
+                LocalDateTime.now()
             )
-        userStorage.addUser(user)
+        userStorage.addUserToStorage(user)
         return Response(Status.FOUND).header("Location", "/login")
     }
 
@@ -66,10 +68,10 @@ class RegisterHandlerPOST(
         if (lensOrNull(passwordInitField, form) != lensOrNull(passwordConfField, form)) {
             errors.add("passwordDiff")
         }
-        if (userStorage.checkLogin(lensOrNull(loginField, form))) {
+        if (userStorage.checkLoginInStorage(lensOrNull(loginField, form))) {
             errors.add("loginExist")
         }
-        if (userStorage.checkNickname(lensOrNull(nicknameField, form))) {
+        if (userStorage.checkNicknameInStorage(lensOrNull(nicknameField, form))) {
             errors.add("nicknameExist")
         }
         return errors
