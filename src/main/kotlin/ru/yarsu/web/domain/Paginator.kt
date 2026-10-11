@@ -6,29 +6,29 @@ import org.http4k.core.query
 const val RANGE = 3
 
 class Paginator(
-    private var viewPage: Int,
-    private var allPages: Int,
+    private val viewPage: Int,
+    private val allPages: Int,
     val uri: Uri,
 ) {
-    private val nearStart = viewPage - RANGE - 2 < 0
-    private val nearEnd = viewPage + RANGE + 3 > allPages
 
+    /*!
+    Тип: вычисление?
+    Функция по получению списка ссылок пагинации назад.
+    Является обёрткой для listPrevPageFromSource()
+    Оперирует: строение Paginator
+     */
     fun listPrevPage(): Map<Int, Uri> {
-        val rollback: MutableMap<Int, Uri> = mutableMapOf()
-        val start = if (!nearStart) viewPage - RANGE else 0
-        for (i in start..<viewPage) {
-            rollback[i] = uri.query("page", i.toString())
-        }
-        return rollback
+        return listPrevPageFromSource(viewPage, uri)
     }
 
+    /*!
+    Тип: вычисление?
+    Функция по получению списка ссылок пагинации вперёд.
+    Является обёрткой для listNextPageFromSource()
+    Оперирует: строение Paginator
+     */
     fun listNextPage(): Map<Int, Uri> {
-        val rollforward: MutableMap<Int, Uri> = mutableMapOf()
-        val end = if (!nearEnd) viewPage + RANGE + 1 else allPages
-        for (i in viewPage + 1..<end) {
-            rollforward[i] = uri.query("page", i.toString())
-        }
-        return rollforward
+        return listNextPageFromSource(viewPage, allPages, uri)
     }
 
     fun getStartPage(): Int {
@@ -41,16 +41,74 @@ class Paginator(
 
     fun getUri(i: Int = 0): Uri {
         if (i == allPages) {
-            return uri.query("page", (i - 1).toString())
+            return getUriWithPage(i-1, uri)
         }
-        return uri.query("page", i.toString())
+        return getUriWithPage(i, uri)
     }
 
     fun getNearStart(): Boolean {
-        return nearStart
+        return isNearStart(viewPage)
     }
 
     fun getNearEnd(): Boolean {
-        return nearEnd
+        return isNearEnd(viewPage, allPages)
     }
 }
+
+/*!
+Тип: вычисление
+Функция по созданию списка пагинации назад для конкретных параметров
+Оперирует: бизнес-правило
+ */
+fun listPrevPageFromSource(currentPage: Int, uri: Uri): Map<Int, Uri> {
+    val start = getCurrentStartFromSource(currentPage)
+    val rollback: MutableMap<Int, Uri> = mutableMapOf()
+    for (i in start..<currentPage) {
+        rollback[i] = getUriWithPage(i, uri)
+    }
+    return rollback
+}
+
+/*!
+Тип: вычисление
+Функция по созданию списка пагинации вперёд для конкретных параметров
+Оперирует: бизнес-правило
+ */
+fun listNextPageFromSource(page: Int, allPages: Int, uri: Uri): Map<Int, Uri> {
+    val end = getCurrentEndFromSource(page, allPages)
+    val rollforward: MutableMap<Int, Uri> = mutableMapOf()
+    for (i in page + 1..<end) {
+        rollforward[i] = getUriWithPage(i, uri)
+    }
+    return rollforward
+}
+
+/*!
+Тип: вычисление
+Функция по проверке нахождения индекса текущей страницы к старту
+Оперирует: бизнес-правило
+ */
+fun getCurrentStartFromSource(page: Int) =
+    if (!isNearStart(page)) page - RANGE else 0
+
+/*!
+Тип: вычисление
+Функция по проверке нахождения индекса текущей страницы к концу
+Оперирует: бизнес-правило
+ */
+fun getCurrentEndFromSource(page: Int, allPages: Int) =
+    if (!isNearEnd(page, allPages)) page + RANGE + 1 else allPages
+
+/*!
+Тип: вычисление
+Функция по добавлению в ссылку параметра page
+Оперирует: бизнес-правило
+ */
+fun getUriWithPage(page: Int, uri: Uri) =
+    uri.query("page", page.toString())
+
+fun isNearStart(page: Int) =
+    page - RANGE - 2 < 0
+
+fun isNearEnd(page: Int, allPages: Int) =
+    page + RANGE + 3 > allPages
