@@ -225,8 +225,8 @@ class AddonStorage(
     }
 
     fun getArticleWithData(
-        article: Article,
-        userInfo: UserInfo
+        userInfo: UserInfo,
+        article: Article
     ): ArticleWithData {
         val form = getFormById(article.formArt)
         val genre = getGenreById(article.genre)
@@ -260,7 +260,7 @@ class AddonStorage(
     ): List<ArticleWithData> {
         val result = mutableListOf<ArticleWithData>()
         articles.forEach {
-            result.add(getArticleWithData(it, userInfo))
+            result.add(getArticleWithData(userInfo, it))
         }
         return result
     }

@@ -43,7 +43,7 @@ class ArticleListHandler(
         val page = lensOrDefault(pageLens, request, 0).takeIf { it > -1 } ?: 0
         val ages = lensOrNull(ageLens, request)
         val forms = lensOrNull(formLens, request)
-        val params = prepareParamsss(ages, forms, uri)
+        val params = prepareParams(ages, forms, uri)
         val sorted = articles.sortAndFilterArticlesFromStorage(params)
         val paginator = Paginator(page, articles.pageAmount(sorted), uri.removeQueries("page"))
         val viewModel =
@@ -59,7 +59,7 @@ class ArticleListHandler(
     }
 }
 
-fun prepareParamsss(
+fun prepareParams(
     ages: List<Int>?,
     forms: List<Int>?,
     uri: Uri,
