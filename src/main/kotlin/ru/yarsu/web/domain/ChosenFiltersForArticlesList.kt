@@ -2,7 +2,7 @@ package ru.yarsu.web.domain
 
 import ru.yarsu.web.domain.article.AgeRatingBook
 
-class ChosenFiltersForArticlesList (
+data class ChosenFiltersForArticlesList (
     val ages: List<AgeRatingBook>,
     val forms: List<Int>,
 )

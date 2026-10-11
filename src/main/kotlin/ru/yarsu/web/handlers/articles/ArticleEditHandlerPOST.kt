@@ -106,7 +106,7 @@ class ArticleEditHandlerPOST(
                             addon.getAllForms(),
                             addon.getAllGenres(),
                             errors,
-                            IntParams(
+                            ArticleCreationParams(
                                 lensOrDefault(ageField, form, -1),
                                 formArt,
                                 genreArt,

@@ -30,15 +30,16 @@ class ArticleHandler(
 
     override fun invoke(request: Request): Response {
         val userInfo = userStorage.getUserInfo(userLens(request)?.login ?: "")
+
         lensOrNull(pathLens, request)
             ?.let { id -> storage.getArticleFromStorage(id) }
             ?.let { article ->
-
+                print(article.id)
                 val page = lensOrDefault(pageLens, request, 0).takeIf { it > -1 } ?: 0
-                val chapters = addon.getChaptersByIds(article.chapters)
+                val chapters = addon.getChaptersOrDefault(article.chapters)
                 val paginator = Paginator(page, article.chapters.size, request.uri.removeQueries("page"))
 
-                if (page >= chapters.size)
+                if (page > chapters.size)
                     return Response(NOT_FOUND)
 
                 val articleWithData = addon.getArticleWithData(userInfo, article)

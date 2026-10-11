@@ -2,7 +2,11 @@ package ru.yarsu.web.domain.storage
 
 import ru.yarsu.web.domain.FilterParams
 import ru.yarsu.web.domain.article.Article
+import ru.yarsu.web.funs.lensOrDefault
+import ru.yarsu.web.handlers.articles.ArticleCreationParams
+import java.time.LocalDateTime
 import kotlin.math.ceil
+import kotlin.math.log
 
 const val INPAGE = 10
 
@@ -134,6 +138,39 @@ class ArticleStorage(articles: List<Article>) {
         articlesMap = addArticleAndGetStorage(article, articlesMap)
         return article.id
     }
+
+    fun createAndPushArticle(
+        dateTime: LocalDateTime,
+        name: String,
+        creationParams: ArticleCreationParams,
+        annotation: String,
+        login: String
+    ): Int {
+        val id = newIdForStorage()
+        val article = createArticle(dateTime, name, creationParams, annotation, id, login)
+        return addArticleToStorage(article)
+    }
+
+        fun createArticle(
+        dateTime: LocalDateTime,
+        name: String,
+        creationParams: ArticleCreationParams,
+        annotation: String,
+        id: Int,
+        login: String
+    ) =
+        Article(
+            dateTime,
+            name,
+            creationParams.age,
+            creationParams.form,
+            emptyList(),
+            creationParams.genre,
+            annotation,
+            emptyList(),
+            id,
+            login,
+        )
 
     /*!
     Тип: вычисление

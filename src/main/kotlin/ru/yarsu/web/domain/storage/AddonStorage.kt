@@ -10,6 +10,7 @@ import ru.yarsu.web.domain.article.Chapter
 import ru.yarsu.web.domain.article.Form
 import ru.yarsu.web.domain.article.Genre
 import ru.yarsu.web.domain.article.Tag
+import ru.yarsu.web.domain.article.getDefaultChapter
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.users.User
 import ru.yarsu.web.users.UserInfo
@@ -122,6 +123,13 @@ class AddonStorage(
     }
 
     fun getTagsByIds(ids: List<Int>): List<String> = tagsMap.filter { it.key in ids }.values.map { it.tag }.toList()
+
+    fun getChaptersOrDefault(ids: List<Int>): List<Chapter> {
+        var chapters = getChaptersByIds(ids)
+        if (chapters.isEmpty())
+            chapters += getDefaultChapter()
+        return chapters
+    }
 
     fun getChaptersByIds(ids: List<Int>): List<Chapter> {
         var result = chaptersMap.filter { it.key in ids }.values.toList()

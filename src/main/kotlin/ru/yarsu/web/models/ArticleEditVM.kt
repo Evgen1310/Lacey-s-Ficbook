@@ -5,7 +5,7 @@ import org.http4k.template.ViewModel
 import ru.yarsu.web.domain.article.AgeRatingBook
 import ru.yarsu.web.domain.article.Genre
 import ru.yarsu.web.domain.article.Form
-import ru.yarsu.web.handlers.articles.IntParams
+import ru.yarsu.web.handlers.articles.ArticleCreationParams
 
 class ArticleEditVM(
     val articleName: String,
@@ -14,5 +14,5 @@ class ArticleEditVM(
     val forms: List<Form>,
     val genres: List<Genre>,
     val errors: List<String>,
-    val params: IntParams,
+    val params: ArticleCreationParams,
 ) : ViewModel

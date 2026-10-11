@@ -71,7 +71,7 @@ class ArticleEditHandler(
                         addon.getAllForms(),
                         addon.getAllGenres(),
                         listOf(),
-                        IntParams(entity.censorAge, formArt, genreArt),
+                        ArticleCreationParams(entity.censorAge, formArt, genreArt),
                     )
                 return Response(Status.OK).with(htmlView(request) of viewModel)
             }

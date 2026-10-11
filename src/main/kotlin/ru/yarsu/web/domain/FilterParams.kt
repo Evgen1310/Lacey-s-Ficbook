@@ -1,6 +1,6 @@
 package ru.yarsu.web.domain
 
-class FilterParams(
+data class FilterParams(
     val ageParams: List<Int>,
     val formParams: List<Int>,
     val error: Boolean,
