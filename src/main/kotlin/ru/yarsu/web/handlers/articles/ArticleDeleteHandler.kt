@@ -41,7 +41,7 @@ class ArticleDeleteHandler(
                 if (permissionsStatus != OK)
                     return Response(permissionsStatus)
 
-                val articles = addon.getArticleWithData(article, userInfo)
+                val articles = addon.getArticleWithData(userInfo, article)
                 val tags = addon.getTagsByIds(article.tagsArt)
 
                 val viewModel = ArticleDeleteVM(

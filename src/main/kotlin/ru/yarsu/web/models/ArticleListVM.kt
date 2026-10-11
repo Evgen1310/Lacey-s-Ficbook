@@ -2,16 +2,14 @@ package ru.yarsu.web.models
 
 import org.http4k.template.ViewModel
 import ru.yarsu.web.domain.Paginator
-import ru.yarsu.web.domain.PebbleParams
+import ru.yarsu.web.domain.ChosenFiltersForArticlesList
 import ru.yarsu.web.domain.article.AgeRatingBook
-import ru.yarsu.web.domain.article.Article
 import ru.yarsu.web.domain.article.ArticleWithData
 import ru.yarsu.web.domain.article.Form
-import ru.yarsu.web.domain.storage.AddonStorage
 
 class ArticleListVM(
     val articles: List<ArticleWithData>,
-    val params: PebbleParams,
+    val chosenFilters: ChosenFiltersForArticlesList,
     val paginator: Paginator,
     val errorStrings: List<Int>,
     val ages: List<AgeRatingBook>,

@@ -1,6 +1,6 @@
 package ru.yarsu.web.domain.storage
 
-import ru.yarsu.web.domain.Params
+import ru.yarsu.web.domain.FilterParams
 import ru.yarsu.web.domain.article.Article
 import kotlin.math.ceil
 
@@ -56,9 +56,9 @@ class ArticleStorage(articles: List<Article>) {
     Является обёрткой для sortAndFilterArticles()
     Оперирует: строение ArticleStorage
      */
-    fun sortAndFilterArticlesFromStorage(params: Params): List<Article> {
+    fun sortAndFilterArticlesFromStorage(filterParams: FilterParams): List<Article> {
         var result = getAllArticles()
-        result = sortAndFilterArticles(result, params)
+        result = sortAndFilterArticles(result, filterParams)
         return result
     }
 
@@ -67,13 +67,13 @@ class ArticleStorage(articles: List<Article>) {
     Функция по сортировке и фильтрации предложенной коллекции статей
     Оперирует: ?
      */
-    fun sortAndFilterArticles(articles: List<Article>, params: Params): List<Article> {
+    fun sortAndFilterArticles(articles: List<Article>, filterParams: FilterParams): List<Article> {
         var result = sortArticlesByDate(articles)
-        if (params.error) {
+        if (filterParams.error) {
             return result
         }
-        result = filterArticlesByAge(result, params.ageParams)
-        result = filterArticlesByForm(result, params.formParams)
+        result = filterArticlesByAge(result, filterParams.ageParams)
+        result = filterArticlesByForm(result, filterParams.formParams)
         return result
     }
 
