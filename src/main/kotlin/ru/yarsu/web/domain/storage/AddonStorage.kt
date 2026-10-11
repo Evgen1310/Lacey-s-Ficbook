@@ -129,10 +129,6 @@ class AddonStorage(
         return result
     }
 
-    fun handleArticleDeletion(article: Article) {
-        removeChapters(article.chapters)
-    }
-
     fun removeChapters(ids: List<Int>) {
         ids.forEach {
             chaptersIds.remove(it)

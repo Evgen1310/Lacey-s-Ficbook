@@ -35,7 +35,8 @@ class ArticleDeleteHandlerPOST(
                 if (permissionsStatus != OK)
                     return Response(permissionsStatus)
 
-                storage.deleteArticleAndChapters(article, addon)
+                storage.deleteArticle(article.id)
+                addon.removeChapters(article.chapters)
 
                 return Response(FOUND).header("Location", "/articles")
             } ?: return Response(NOT_FOUND)
