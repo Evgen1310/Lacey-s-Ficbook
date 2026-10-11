@@ -189,7 +189,7 @@ class UserStorage(
      */
     fun getUserInfo(login: String): UserInfo {
         val user = getUserFromStorage(login)
-        return createUserInfo(user?.nickName, user?.about)
+        return createUserInfo(user?.login, user?.nickName, user?.about)
     }
 
     /*!
@@ -197,8 +197,9 @@ class UserStorage(
     Функция по созданию объекта UserInfo из объекта User
     Оперирует: строение UserInfo
      */
-    fun createUserInfo(nickname: String?, about: String?): UserInfo {
+    fun createUserInfo(login: String?, nickname: String?, about: String?): UserInfo {
         return UserInfo(
+            login ?: "",
             nickname ?: "",
             about ?: "Ошибка. Обратитесь к администратору.",
         )

@@ -220,16 +220,45 @@ class AddonStorage(
         return chapters
     }
 
-    fun createArticleWithData(article: Article, userStorage: UserStorage, addonStorage: AddonStorage): ArticleWithData {
+    fun getArticleWithData(
+        article: Article,
+        userInfo: UserInfo
+    ): ArticleWithData {
+        val form = getFormById(article.formArt)
+        val genre = getGenreById(article.genre)
+        val chapters = getChaptersByIds(article.chapters).map { it.id }
+        val editArticle = article.user == userInfo.login
+        return createArticleWithData(article, form, genre, chapters, userInfo, editArticle)
+    }
+
+    fun createArticleWithData(
+        article: Article,
+        form: String,
+        genre: String,
+        chapters: List<Int>,
+        userInfo: UserInfo,
+        editArticle: Boolean
+    ): ArticleWithData {
         return ArticleWithData(
             article,
-            getFormById(article.formArt),
-            getGenreById(article.genre),
-            userStorage.getUserInfo(article.user).userNick,
-            userStorage.getUserInfo(article.user).userAbout,
-            addonStorage.getChaptersByIds(article.chapters).map { it.id },
-            false
+            form,
+            genre,
+            userInfo.userNick,
+            userInfo.userAbout,
+            chapters,
+            editArticle
         )
+    }
+
+    fun makeArticlesWithData(
+        userInfo: UserInfo,
+        articles: List<Article>
+    ): List<ArticleWithData> {
+        val result = mutableListOf<ArticleWithData>()
+        articles.forEach {
+            result.add(getArticleWithData(it, userInfo))
+        }
+        return result
     }
 
     fun pageAmount(mode: String): Int {

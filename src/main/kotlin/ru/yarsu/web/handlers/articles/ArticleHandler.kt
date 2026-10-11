@@ -37,10 +37,9 @@ class ArticleHandler(
                 val paginator = Paginator(page, entity.chapters.size, request.uri.removeQueries("page"))
                 return Response(OK).with(
                     htmlView(request) of ArticleVM(
-                        makeArticlesWithData(
+                        addon.makeArticlesWithData(
                             login,
                             listOf(entity),
-                            addon,
                             userStorage
                         )[0],
                         addon.getTagsByIds(entity.tagsArt),

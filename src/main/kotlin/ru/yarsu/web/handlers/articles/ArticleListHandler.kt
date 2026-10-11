@@ -17,8 +17,6 @@ import ru.yarsu.web.domain.Paginator
 import ru.yarsu.web.domain.Params
 import ru.yarsu.web.domain.PebbleParams
 import ru.yarsu.web.domain.article.AgeRatingBook
-import ru.yarsu.web.domain.article.Article
-import ru.yarsu.web.domain.article.ArticleWithData
 import ru.yarsu.web.domain.storage.AddonStorage
 import ru.yarsu.web.domain.storage.ArticleStorage
 import ru.yarsu.web.domain.storage.UserStorage
@@ -50,7 +48,7 @@ class ArticleListHandler(
         val paginator = Paginator(page, articles.pageAmount(sorted), uri.removeQueries("page"))
         val viewModel =
             ArticleListVM(
-                makeArticlesWithData(login, articles.articlesByPageNumber(page, sorted), addon, userStorage),
+                addon.makeArticlesWithData(login, articles.articlesByPageNumber(page, sorted), userStorage),
                 preparePebble(params),
                 paginator,
                 prepareErrorStrings(params.error, sorted.size),
@@ -59,22 +57,6 @@ class ArticleListHandler(
             )
         return Response(Status.OK).with(htmlView(request) of viewModel)
     }
-}
-
-fun makeArticlesWithData(
-    login: String,
-    articles: List<Article>,
-    addonStorage: AddonStorage,
-    userStorage: UserStorage
-): List<ArticleWithData> {
-    val result = mutableListOf<ArticleWithData>()
-    articles.forEach {
-        var artData = addonStorage.createArticleWithData(it, userStorage, addonStorage)
-        if (artData.article.user == login)
-            artData = artData.copy(editArticle = true)
-        result.add(artData)
-    }
-    return result
 }
 
 fun prepareParamsss(
