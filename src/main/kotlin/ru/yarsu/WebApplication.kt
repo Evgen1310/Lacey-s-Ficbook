@@ -25,6 +25,7 @@ import ru.yarsu.web.domain.article.Genre
 import ru.yarsu.web.domain.article.Tag
 import ru.yarsu.web.domain.storage.AddonStorage
 import ru.yarsu.web.domain.storage.ArticleStorage
+import ru.yarsu.web.domain.storage.PasswordHandler
 import ru.yarsu.web.domain.storage.UserStorage
 import ru.yarsu.web.filters.NotFoundFilter
 import ru.yarsu.web.filters.getPermissionsFilter
@@ -50,9 +51,11 @@ fun main() {
     val forms: List<Form> = objectMapper.readValue(File("${dbConfig.databasePath}/forms-data.json"))
     val genres: List<Genre> = objectMapper.readValue(File("${dbConfig.databasePath}/genres-data.json"))
 
+    val passwordHandler = PasswordHandler(dbConfig.authSalt)
+
     val storage = ArticleStorage(articles)
     val storageAddon = AddonStorage(chapters, tags, forms, genres)
-    val userStorage = UserStorage(users, dbConfig.authSalt)
+    val userStorage = UserStorage(users, passwordHandler)
     val jwtTools = JwtTools(dbConfig.jwtSalt, "ru.yarsu", 7)
 
     val renderer = rendererProvider(true)
@@ -95,30 +98,10 @@ fun main() {
                 ),
             ),
         )
-    val hook =
-        thread(start = false) {
-            shutDownSequence(dbConfig.databasePath, objectMapper, storage, storageAddon, userStorage)
-        }
-    Runtime.getRuntime().addShutdownHook(hook)
     val server = appWithStaticResources.asServer(Netty(appConfig.webConfig.webPort)).start()
 
     println("Server started on http://localhost:" + server.port())
     println("Press enter to exit application.")
     readln()
     server.stop()
-}
-
-fun shutDownSequence(
-    path: String,
-    objectMapper: ObjectMapper,
-    articleStorage: ArticleStorage,
-    addonStorage: AddonStorage,
-    userStorage: UserStorage,
-) {
-    objectMapper.writeValue(File("$path/articles-data.json"), articleStorage.getAllArticles())
-    objectMapper.writeValue(File("$path/tags-data.json"), addonStorage.getAllTags())
-    objectMapper.writeValue(File("$path/chapters-data.json"), addonStorage.getAllChapters())
-    objectMapper.writeValue(File("$path/users-data.json"), userStorage.getAllUsers())
-    objectMapper.writeValue(File("$path/forms-data.json"), addonStorage.getAllForms())
-    objectMapper.writeValue(File("$path/genres-data.json"), addonStorage.getAllGenres())
 }

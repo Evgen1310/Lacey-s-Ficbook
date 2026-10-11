@@ -47,7 +47,7 @@ class GenreNewHandlerPOST(private val htmlView: ContextAwareViewRender, private 
     private fun checkErrors(form: WebForm): List<String> {
         val errors = form.errors.map { it.meta.name }.toMutableList()
         val genreNew = lensOrDefault(genreField, form, "")
-        if (addon.checkGenre(genreNew))
+        if (addon.checkGenreInStorage(genreNew))
             errors.add("genreExist")
         return errors
     }

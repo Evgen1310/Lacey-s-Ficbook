@@ -6,6 +6,7 @@ import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.Status.Companion.NOT_FOUND
+import org.http4k.core.Status.Companion.OK
 import org.http4k.core.with
 import org.http4k.lens.FormField
 import org.http4k.lens.Path
@@ -17,14 +18,15 @@ import org.http4k.lens.nonBlankString
 import org.http4k.lens.webForm
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
 import ru.yarsu.web.domain.Permissions
-import ru.yarsu.web.domain.article.AgeRatingBook
 import ru.yarsu.web.domain.article.Article
 import ru.yarsu.web.domain.storage.AddonStorage
 import ru.yarsu.web.domain.storage.ArticleStorage
 import ru.yarsu.web.funs.lensOrDefault
 import ru.yarsu.web.funs.lensOrNull
-import ru.yarsu.web.models.ArticleEditVM
 import ru.yarsu.web.users.User
+import ru.yarsu.web.domain.article.ArticleCreationParams
+import ru.yarsu.web.funs.checkPermissionForArticleEditing
+import ru.yarsu.web.models.handleArticleEditError
 
 class ArticleEditHandlerPOST(
     private val htmlView: ContextAwareViewRender,
@@ -49,6 +51,7 @@ class ArticleEditHandlerPOST(
     private val namesNewField = FormField.nonBlankString().optional("namesNew")
     private val textsNewField = FormField.nonBlankString().optional("textsNew")
     private val delChpField = FormField.int().multi.optional("delChp")
+
     private val formLens =
         Body.webForm(
             Validator.Feedback,
@@ -72,50 +75,43 @@ class ArticleEditHandlerPOST(
         val permissions = permissionsLens(request)
         val login = userLens(request)?.login ?: ""
         lensOrNull(pathLens, request)
-            ?.let { id -> storage.getArticleId(id) }
-            ?.let { entity ->
-                if (!permissions.manageAllArticles) {
-                    if (!(permissions.manageArticle && entity.user == login)) {
-                        return Response(Status.UNAUTHORIZED)
-                    }
-                }
+            ?.let { id -> storage.getArticleFromStorage(id) }
+            ?.let { article ->
+                val permissionsStatus = checkPermissionForArticleEditing(permissions, login, article.user)
+                if (permissionsStatus != OK)
+                    return Response(permissionsStatus)
+
                 val form = formLens(request)
-                val formArt =
-                    if (addon.getFormById(lensOrDefault(formArtField, form, -1)) == "Не выбрано") -1 else lensOrDefault(
-                        formArtField,
-                        form,
-                        -1
-                    )
-                val genreArt =
-                    if (addon.getGenreById(lensOrDefault(genreField, form, -1)) == "Не выбрано") -1 else lensOrDefault(
-                        genreField,
-                        form,
-                        -1
-                    )
-                val errors =
-                    prepareErrors(
-                        form,
-                        entity,
-                    )
+
+                val rawFormId = lensOrDefault(formArtField, form, -1)
+                val rawGenreId = lensOrDefault(genreField, form, -1)
+                val formArt = addon.getFormIdOrDefault(rawFormId)
+                val genreArt = addon.getGenreIdOrDefault(rawGenreId)
+                val age = lensOrDefault(ageField, form, -1)
+
+                val creationParams = ArticleCreationParams(
+                    age,
+                    formArt,
+                    genreArt,
+                )
+
+                val errors = prepareErrors(form, article)
+
                 if (errors.isNotEmpty()) {
                     val viewModel =
-                        ArticleEditVM(
-                            entity.nameArt,
+                        handleArticleEditError(
+                            article.nameArt,
                             form,
-                            AgeRatingBook.entries,
                             addon.getAllForms(),
                             addon.getAllGenres(),
                             errors,
-                            IntParams(
-                                lensOrDefault(ageField, form, -1),
-                                formArt,
-                                genreArt,
-                            ),
+                            creationParams
                         )
-                    return Response(Status.OK).with(htmlView(request) of viewModel)
+                    return Response(OK).with(htmlView(request) of viewModel)
                 }
+
                 val chapters = addon.prepareChapters(
-                    entity,
+                    article,
                     lensOrDefault(chaptersOldField, form, listOf()),
                     lensOrDefault(delChpField, form, listOf()),
                     lensOrDefault(namesOldField, form, listOf()),
@@ -128,19 +124,15 @@ class ArticleEditHandlerPOST(
                     lensOrDefault(tagsOldField, form, listOf()),
                     lensOrDefault(tagsNewField, form, ""),
                 )
-                val articleToDo = Article(
-                    entity.dateAdd,
-                    nameField(form),
-                    lensOrDefault(ageField, form, -1),
-                    lensOrDefault(formArtField, form, -1),
-                    listOf(),
-                    lensOrDefault(genreField, form, -1),
-                    lensOrDefault(annotationField, form, ""),
-                    listOf(),
-                    entity.id,
-                    login,
+                val id = storage.updateArticleAndPush(
+                    originalArticle = article,
+                    newName = nameField(form),
+                    creationParams = creationParams,
+                    annotation = lensOrDefault(annotationField, form, ""),
+                    login = login,
+                    tags = tags,
+                    chapters = chapters
                 )
-                val id = storage.prepareArticle(articleToDo, tags, chapters)
                 return Response(Status.FOUND).header("Location", "/articles/$id")
             } ?: return Response(NOT_FOUND)
     }

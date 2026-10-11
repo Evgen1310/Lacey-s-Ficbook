@@ -19,7 +19,7 @@ class FormDeleteHandlerPOST(private val addonStorage: AddonStorage) :
                     .let { formArt ->
                         if (formArt == "Не определено")
                             return Response(Status.NOT_FOUND)
-                        addonStorage.removeForm(id)
+                        addonStorage.removeFormFromStorage(id)
                         return Response(Status.FOUND).header("Location", "/redaction/forms")
                     }
             } ?: return Response(Status.NOT_FOUND)

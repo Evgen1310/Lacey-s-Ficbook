@@ -20,8 +20,8 @@ class UsersListHandler(private val htmlView: ContextAwareViewRender, private val
 
     override fun invoke(request: Request): Response {
         val page = lensOrDefault(pageLens, request, 0).takeIf { it > -1 } ?: 0
-        val users = userStorage.makeUsersWithData(userStorage.usersByPageNumber(page))
-        val paginator = Paginator(page, userStorage.getPageAmount(), request.uri.removeQueries("page"))
+        val users = userStorage.makeUsersWithData(userStorage.usersByPageNumberFromStorage(page))
+        val paginator = Paginator(page, userStorage.getPageAmountFromStorage(), request.uri.removeQueries("page"))
         val viewModel = UsersListVM(users, paginator)
         return Response(Status.OK).with(htmlView(request) of viewModel)
     }

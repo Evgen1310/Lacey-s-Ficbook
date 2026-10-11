@@ -1,15 +1,16 @@
 package ru.yarsu.web.funs
 
+/*!
+Тип: вычисление
+Почему ты существуешь, я не помню
+Оперирует: бизнес-логика
+ */
 fun prepareErrorStrings(
-    param: Boolean,
-    articlesSize: Int,
+    hasFilterError: Boolean,
+    articlesSize: Int
 ): List<Int> {
-    val result = mutableListOf(0, 0)
-    if (param) {
-        result[0] = 1
-    }
-    if (articlesSize == 0) {
-        result[1] = 1
-    }
-    return result
+    return listOf(
+        if (hasFilterError) 1 else 0, // Ошибка параметров
+        if (articlesSize == 0) 1 else 0 // Нет статей
+    )
 }

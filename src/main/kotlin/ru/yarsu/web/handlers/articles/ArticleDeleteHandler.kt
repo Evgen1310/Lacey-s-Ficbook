@@ -5,6 +5,7 @@ import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.Status.Companion.NOT_FOUND
+import org.http4k.core.Status.Companion.OK
 import org.http4k.core.with
 import org.http4k.lens.Path
 import org.http4k.lens.RequestContextLens
@@ -14,6 +15,7 @@ import ru.yarsu.web.domain.Permissions
 import ru.yarsu.web.domain.storage.AddonStorage
 import ru.yarsu.web.domain.storage.ArticleStorage
 import ru.yarsu.web.domain.storage.UserStorage
+import ru.yarsu.web.funs.*
 import ru.yarsu.web.funs.lensOrNull
 import ru.yarsu.web.models.ArticleDeleteVM
 import ru.yarsu.web.users.User
@@ -30,20 +32,24 @@ class ArticleDeleteHandler(
 
     override fun invoke(request: Request): Response {
         val permissions = permissionsLens(request)
-        val login = userLens(request)?.login ?: ""
+        val userInfo = userStorage.getUserInfo(userLens(request)?.login ?: "")
+
         lensOrNull(pathLens, request)
-            ?.let { id -> storage.getArticleId(id) }
-            ?.let { entity ->
-                if (!permissions.manageAllArticles) {
-                    if (!(permissions.manageArticle && entity.user == login)) {
-                        return Response(Status.UNAUTHORIZED)
-                    }
-                }
+            ?.let { id -> storage.getArticleFromStorage(id) }
+            ?.let { article ->
+                val permissionsStatus = checkPermissionForArticleEditing(permissions, userInfo.login, article.user)
+                if (permissionsStatus != OK)
+                    return Response(permissionsStatus)
+
+                val articles = addon.getArticleWithData(userInfo, article)
+                val tags = addon.getTagsByIds(article.tagsArt)
+
                 val viewModel = ArticleDeleteVM(
-                    makeArticlesWithData(login, listOf(entity), addon, userStorage)[0],
-                    addon.getTagsByIds(entity.tagsArt)
+                    articles,
+                    tags
                 )
-                return Response(Status.OK).with(htmlView(request) of viewModel)
-            } ?: return Response(NOT_FOUND)
+
+                return Response(OK).with(htmlView(request) of viewModel)
+        } ?: return Response(NOT_FOUND)
     }
 }

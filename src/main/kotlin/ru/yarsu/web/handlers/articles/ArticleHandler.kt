@@ -9,6 +9,7 @@ import org.http4k.lens.RequestContextLens
 import org.http4k.lens.int
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
 import ru.yarsu.web.domain.Paginator
+import ru.yarsu.web.domain.article.ArticleWithData
 import ru.yarsu.web.domain.storage.AddonStorage
 import ru.yarsu.web.domain.storage.ArticleStorage
 import ru.yarsu.web.domain.storage.UserStorage
@@ -28,24 +29,27 @@ class ArticleHandler(
     private val pageLens = Query.int().required("page")
 
     override fun invoke(request: Request): Response {
-        val login = lensOrNull(userLens, request)?.login ?: ""
+        val userInfo = userStorage.getUserInfo(userLens(request)?.login ?: "")
+
         lensOrNull(pathLens, request)
-            ?.let { id -> storage.getArticleId(id) }
-            ?.let { entity ->
+            ?.let { id -> storage.getArticleFromStorage(id) }
+            ?.let { article ->
                 val page = lensOrDefault(pageLens, request, 0).takeIf { it > -1 } ?: 0
-                val chapter = addon.getChaptersByIds(entity.chapters)[page]
-                val paginator = Paginator(page, entity.chapters.size, request.uri.removeQueries("page"))
+                val chapters = addon.getChaptersOrDefault(article.chapters)
+                val paginator = Paginator(page, article.chapters.size, request.uri.removeQueries("page"))
+
+                if (page >= chapters.size)
+                    return Response(NOT_FOUND)
+
+                val articleWithData = addon.getArticleWithData(userInfo, article)
+                val tags = addon.getTagsByIds(article.tagsArt)
+
                 return Response(OK).with(
                     htmlView(request) of ArticleVM(
-                        makeArticlesWithData(
-                            login,
-                            listOf(entity),
-                            addon,
-                            userStorage
-                        )[0],
-                        addon.getTagsByIds(entity.tagsArt),
-                        chapter,
-                        addon.getChaptersByIds(entity.chapters),
+                        articleWithData,
+                        tags,
+                        chapters[page],
+                        chapters,
                         paginator,
                     )
                 )

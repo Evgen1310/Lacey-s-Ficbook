@@ -61,7 +61,7 @@
                         {%  for age in model.ages %}
                             <div>
                                 <input type="checkbox"
-                                       {% if model.params.ages contains age %}checked{% endif %} name="age"
+                                       {% if model.chosenFilters.ages contains age %}checked{% endif %} name="age"
                                        id="{{ age.value }}" value="{{ loop.index }}"/>
                                 <label for="{{ age.value }}">{{ age.value }}</label>
                             </div>
@@ -75,7 +75,7 @@
                             {% if formArt.id != -1 %}
                                 <div>
                                     <input type="checkbox"
-                                           {% if model.params.forms contains formArt.id %}checked{% endif %} name="formArt"
+                                           {% if model.chosenFilters.forms contains formArt.id %}checked{% endif %} name="formArt"
                                            id="{{ formArt.form }}" value="{{ formArt.id }}"/>
                                     <label for="{{ formArt.form }}">{{ formArt.form }}</label>
                                 </div>
