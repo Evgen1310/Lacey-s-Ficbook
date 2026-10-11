@@ -2,11 +2,9 @@ package ru.yarsu.web.domain.storage
 
 import ru.yarsu.web.domain.FilterParams
 import ru.yarsu.web.domain.article.Article
-import ru.yarsu.web.funs.lensOrDefault
-import ru.yarsu.web.handlers.articles.ArticleCreationParams
+import ru.yarsu.web.domain.article.ArticleCreationParams
 import java.time.LocalDateTime
 import kotlin.math.ceil
-import kotlin.math.log
 
 const val INPAGE = 10
 
@@ -38,11 +36,12 @@ class ArticleStorage(articles: List<Article>) {
     }
 
     /*!
-    Функция по удалению статьи из предложенной коллекции
+    Функция по удалению статьи из предложенной коллекции.
+    Является обёрткой для removeValueFromMap()
     Оперирует: бизнес-логика
      */
     fun removeArticleAndGetStorage(id: Int, storage: Map<Int, Article>) =
-        storage - id
+        removeValueFromMap(id, storage)
 
     /*!
     Тип: действие
@@ -139,6 +138,11 @@ class ArticleStorage(articles: List<Article>) {
         return article.id
     }
 
+    /*!
+    Тип: действие
+    Функция по созданию Article из параметров и добавление его в хранилище
+    Оперирует: структура Article, структура ArticleStorage
+     */
     fun createAndPushArticle(
         dateTime: LocalDateTime,
         name: String,
@@ -151,7 +155,12 @@ class ArticleStorage(articles: List<Article>) {
         return addArticleToStorage(article)
     }
 
-        fun createArticle(
+    /*!
+    Тип: вычисление, конструктор
+    Функция по созданию объекта класса Article из параметров
+    Оперирует: структура Article
+     */
+    fun createArticle(
         dateTime: LocalDateTime,
         name: String,
         creationParams: ArticleCreationParams,
@@ -173,12 +182,42 @@ class ArticleStorage(articles: List<Article>) {
         )
 
     /*!
+    Тип: действие (вызывает действие)
+    Функция по обновлению существующей статьи и сохранению её в хранилище.
+    Оперирует: Article, String, ArticleCreationParams, String, List<Int>, List<Int> -> Int
+    */
+    fun updateArticleAndPush(
+        originalArticle: Article,
+        newName: String,
+        creationParams: ArticleCreationParams,
+        annotation: String,
+        login: String,
+        tags: List<Int>,
+        chapters: List<Int>
+    ): Int {
+        // 1. Чистое вычисление: создаем новую версию статьи на основе старой
+        val updatedArticle = originalArticle.copy(
+            nameArt = newName,
+            censorAge = creationParams.age,
+            formArt = creationParams.form,
+            genre = creationParams.genre,
+            annotation = annotation,
+            user = login,
+            tagsArt = tags,
+            chapters = chapters
+        )
+        // 2. Действие: сохраняем (перезаписываем по тому же ID)
+        return addArticleToStorage(updatedArticle)
+    }
+
+    /*!
     Тип: вычисление
-    Функция по добавлению объекта Article в предложенную коллекцию
+    Функция по добавлению объекта Article в предложенную коллекцию.
+    Является обёрткой для addValueToMap()
     Оперирует: ?
      */
     fun addArticleAndGetStorage(article: Article, storage: Map<Int, Article>) =
-        storage + (article.id to article)
+        addValueToMap(article.id, article, storage)
 
     /*!
     Тип: вычисление
@@ -186,25 +225,20 @@ class ArticleStorage(articles: List<Article>) {
     Оперирует: бизнес-логика
      */
     fun pageAmount(articles: List<Article>): Int {
-        return ceil(articles.size.toDouble() / INPAGE).toInt()
+        return getPageAmount(INPAGE, articles)
     }
 
     /*!
     Тип: вычисление
-    Функция по получению списка статей по заданному номеру страницы из предложенной коллекции
+    Функция по получению списка статей по заданному номеру страницы из предложенной коллекции.
+    Является оболочкой valuesByPage()
     Оперирует: бизнес-логика
      */
     fun articlesByPageNumber(
         pageNumber: Int,
         articles: List<Article>,
     ): List<Article> {
-        val resultList = mutableListOf<Article>()
-        for (i in 0..<INPAGE) {
-            if (i + pageNumber * INPAGE < articles.size) {
-                resultList.add(articles[i + pageNumber * INPAGE])
-            }
-        }
-        return resultList
+        return valuesByPage(pageNumber, articles)
     }
 
     /*!

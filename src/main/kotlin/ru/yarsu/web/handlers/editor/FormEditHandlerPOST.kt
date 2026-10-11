@@ -50,7 +50,7 @@ class FormEditHandlerPOST(
                             )
                             return Response(Status.OK).with(htmlView(request) of viewModel)
                         }
-                        addonStorage.changeForm(id, newFormField(form))
+                        addonStorage.changeFormInStorage(id, newFormField(form))
                         return Response(Status.FOUND).header("Location", "/redaction/forms")
                     }
             } ?: return Response(Status.NOT_FOUND)
@@ -67,7 +67,7 @@ class FormEditHandlerPOST(
     private fun checkErrors(form: WebForm, formArtOld: String): List<String> {
         val errors = form.errors.map { it.meta.name }.toMutableList()
         val formArtNew = lensOrDefault(newFormField, form, "")
-        if (addonStorage.checkForm(formArtNew, formArtOld))
+        if (addonStorage.checkFormInStorage(formArtNew, formArtOld))
             errors.add("formExist")
         return errors
     }

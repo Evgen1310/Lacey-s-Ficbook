@@ -19,7 +19,7 @@ class GenreDeleteHandlerPOST(private val addonStorage: AddonStorage) :
                     .let { genre ->
                         if (genre == "Не определено")
                             return Response(Status.NOT_FOUND)
-                        addonStorage.removeGenre(id)
+                        addonStorage.removeGenreFromStorage(id)
                         return Response(Status.FOUND).header("Location", "/redaction/genres")
                     }
             } ?: return Response(Status.NOT_FOUND)

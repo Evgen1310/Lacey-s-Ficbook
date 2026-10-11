@@ -47,7 +47,7 @@ class FormNewHandlerPOST(private val htmlView: ContextAwareViewRender, private v
     private fun checkErrors(form: WebForm): List<String> {
         val errors = form.errors.map { it.meta.name }.toMutableList()
         val formArtNew = lensOrDefault(formField, form, "")
-        if (addon.checkForm(formArtNew))
+        if (addon.checkFormInStorage(formArtNew))
             errors.add("formExist")
         return errors
     }

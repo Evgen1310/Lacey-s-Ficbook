@@ -50,7 +50,7 @@ class GenreEditHandlerPOST(
                             )
                             return Response(Status.OK).with(htmlView(request) of viewModel)
                         }
-                        addonStorage.changeGenre(id, genreField(form))
+                        addonStorage.changeGenreInStorage(id, genreField(form))
                         return Response(Status.FOUND).header("Location", "/redaction/genres")
                     }
             } ?: return Response(Status.NOT_FOUND)
@@ -67,7 +67,7 @@ class GenreEditHandlerPOST(
     private fun checkErrors(form: WebForm, formArtOld: String): List<String> {
         val errors = form.errors.map { it.meta.name }.toMutableList()
         val genreNew = lensOrDefault(genreField, form, "")
-        if (addonStorage.checkGenre(genreNew, formArtOld))
+        if (addonStorage.checkGenreInStorage(genreNew, formArtOld))
             errors.add("genreExist")
         return errors
     }

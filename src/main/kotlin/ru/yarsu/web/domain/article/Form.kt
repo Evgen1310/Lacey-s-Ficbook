@@ -1,6 +1,6 @@
 package ru.yarsu.web.domain.article
 
-class Form(
+data class Form(
     val id: Int,
     val form: String,
 )

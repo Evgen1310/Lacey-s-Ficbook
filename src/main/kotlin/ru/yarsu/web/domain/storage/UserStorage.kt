@@ -174,11 +174,12 @@ class UserStorage(
 
     /*!
     Тип: вычисление
-    Функция по проверке уникальности никнейма пользователя среди предложенной коллекции
+    Функция по проверке уникальности никнейма пользователя среди предложенной коллекции.
+    Является обёрткой для checkValueInCollectionsWithIgnore()
     Оперирует: бизнес-правило
      */
     fun checkNickname(nickname: String?, ignore: String? = null, nicksCollection: Collection<String>): Boolean {
-        return (nickname != null) && (nickname != ignore) && (nickname in nicksCollection)
+        return checkValueInCollectionsWithIgnore(nickname, ignore, nicksCollection)
     }
 
     /*!
@@ -240,16 +241,7 @@ class UserStorage(
     Оперирует: строение UserStorage
      */
     fun getPageAmountFromStorage(): Int{
-        return getPageAmount(usersMap.values)
-    }
-
-    /*!
-    Тип: вычисление
-    Функция для определения количества страниц любой коллекции
-    Оперирует: бизнес-правила
-     */
-    fun getPageAmount(collection: Collection<*>): Int {
-        return ceil(collection.size.toDouble() / INPAGE_DOP).toInt()
+        return getPageAmount(INPAGE_DOP, usersMap.values)
     }
 
     /*!
@@ -268,18 +260,13 @@ class UserStorage(
     /*!
     Тип: вычисление
     Функция по сбору коллекции с User для определённого номера страницы из предложенной коллекции User.
+    Является оболочкой valuesByPage()
     Оперирует: бизнес-правила, константой INPAGE_DOP
      */
     fun usersByPage(
         pageNumber: Int,
         userList: List<User>,
     ): List<User> {
-        val resultList = mutableListOf<User>()
-        for (i in 0..<INPAGE_DOP) {
-            if (i + pageNumber * INPAGE_DOP < userList.size) {
-                resultList.add(userList[i + pageNumber * INPAGE_DOP])
-            }
-        }
-        return resultList
+        return valuesByPage(pageNumber, userList)
     }
 }

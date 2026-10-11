@@ -5,7 +5,7 @@ import org.http4k.template.ViewModel
 import ru.yarsu.web.domain.article.AgeRatingBook
 import ru.yarsu.web.domain.article.Form
 import ru.yarsu.web.domain.article.Genre
-import ru.yarsu.web.handlers.articles.ArticleCreationParams
+import ru.yarsu.web.domain.article.ArticleCreationParams
 
 class NewArticleVM(
     val form: WebForm,

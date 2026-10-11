@@ -11,6 +11,7 @@ import org.http4k.lens.WebForm
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
 import ru.yarsu.web.domain.Permissions
 import ru.yarsu.web.domain.article.AgeRatingBook
+import ru.yarsu.web.domain.article.createArticleCreationParams
 import ru.yarsu.web.domain.storage.AddonStorage
 import ru.yarsu.web.funs.checkPermissionForArticleCreation
 import ru.yarsu.web.models.NewArticleVM
@@ -41,12 +42,3 @@ class NewArticleHandler(
         return Response(OK).with(htmlView(request) of viewModel)
     }
 }
-
-data class ArticleCreationParams(
-    val age: Int,
-    val form: Int,
-    val genre: Int,
-)
-
-fun createArticleCreationParams(age: Int = -1, form: Int = -1, genre: Int = -1) =
-    ArticleCreationParams(age, form, genre)

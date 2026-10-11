@@ -3,9 +3,8 @@ package ru.yarsu.web.handlers.articles
 import org.http4k.core.HttpHandler
 import org.http4k.core.Request
 import org.http4k.core.Response
-import org.http4k.core.Status
 import org.http4k.core.Status.Companion.NOT_FOUND
-import org.http4k.core.Status.Companion.UNAUTHORIZED
+import org.http4k.core.Status.Companion.OK
 import org.http4k.core.with
 import org.http4k.lens.FormField
 import org.http4k.lens.Path
@@ -15,11 +14,14 @@ import org.http4k.lens.int
 import org.http4k.lens.nonBlankString
 import ru.ac.uniyar.web.templates.ContextAwareViewRender
 import ru.yarsu.web.domain.Permissions
-import ru.yarsu.web.domain.article.AgeRatingBook
+import ru.yarsu.web.domain.article.Article
+import ru.yarsu.web.domain.article.ArticleCreationParams
+import ru.yarsu.web.domain.article.Chapter
 import ru.yarsu.web.domain.storage.AddonStorage
 import ru.yarsu.web.domain.storage.ArticleStorage
+import ru.yarsu.web.funs.checkPermissionForArticleEditing
 import ru.yarsu.web.funs.lensOrNull
-import ru.yarsu.web.models.ArticleEditVM
+import ru.yarsu.web.models.createArticleEditVM
 import ru.yarsu.web.users.User
 
 class ArticleEditHandler(
@@ -33,8 +35,6 @@ class ArticleEditHandler(
     private val pathLens = Path.int().of("id")
     private val nameField = FormField.nonBlankString().required("name")
     private val annotationField = FormField.nonBlankString().optional("annotation")
-//    private val authorField = FormField.nonBlankString().required("author")
-//    private val aboutField = FormField.nonBlankString().optional("about")
     private val tagsOldField = FormField.nonBlankString().multi.required("tagsOld")
     private val chaptersOldField = FormField.int().multi.required("chaptersOld")
     private val namesOldField = FormField.nonBlankString().multi.required("namesOld")
@@ -43,38 +43,43 @@ class ArticleEditHandler(
     override fun invoke(request: Request): Response {
         val permissions = permissionsLens(request)
         val login = userLens(request)?.login
+
         lensOrNull(pathLens, request)
             ?.let { id -> storage.getArticleFromStorage(id) }
-            ?.let { entity ->
-                if (!permissions.manageAllArticles) {
-                    if (!(permissions.manageArticle && entity.user == login)) {
-                        return Response(UNAUTHORIZED)
-                    }
-                }
-                val formArt = if (addon.getFormById(entity.formArt) == "Не выбрано") -1 else entity.formArt
-                val genreArt = if (addon.getGenreById(entity.genre) == "Не выбрано") -1 else entity.genre
-                val chapters = addon.getChaptersByIds(entity.chapters)
+            ?.let { article ->
+                val permissionsStatus = checkPermissionForArticleEditing(permissions, login, article.user)
+                if (permissionsStatus != OK)
+                    return Response(permissionsStatus)
+
+                val formArt = addon.getFormIdOrDefault(article.formArt)
+                val genreArt = addon.getGenreIdOrDefault(article.genre)
+                val chapters = addon.getChaptersOrDefault(article.chapters)
+
+                val articleParams = ArticleCreationParams(article.censorAge, formArt, genreArt)
+                val forms = addon.getAllForms()
+                val genres = addon.getAllGenres()
+
                 val viewModel =
-                    ArticleEditVM(
-                        entity.nameArt,
-                        WebForm().with(
-                            nameField of entity.nameArt,
-                            annotationField of entity.annotation,
-//                            authorField of addon.getAuthorById(entity.author).name,
-//                            aboutField of addon.getAuthorById(entity.author).description,
-                            tagsOldField of addon.getTagsByIds(entity.tagsArt),
-                            chaptersOldField of chapters.map { it.chapter },
-                            namesOldField of chapters.map { it.name },
-                            textsOldField of chapters.map { it.content },
-                        ),
-                        AgeRatingBook.entries,
-                        addon.getAllForms(),
-                        addon.getAllGenres(),
-                        listOf(),
-                        ArticleCreationParams(entity.censorAge, formArt, genreArt),
+                    createArticleEditVM(
+                        article.nameArt,
+                        webFormForArticleEdit(article, chapters),
+                        forms,
+                        genres,
+                        creationParams = articleParams
                     )
-                return Response(Status.OK).with(htmlView(request) of viewModel)
+
+                return Response(OK).with(htmlView(request) of viewModel)
             }
         return Response(NOT_FOUND)
     }
+
+    private fun webFormForArticleEdit(article: Article, chapters: List<Chapter>) =
+        WebForm().with(
+            nameField of article.nameArt,
+            annotationField of article.annotation,
+            tagsOldField of addon.getTagsByIds(article.tagsArt),
+            chaptersOldField of chapters.map { it.chapter },
+            namesOldField of chapters.map { it.name },
+            textsOldField of chapters.map { it.content },
+        )
 }
