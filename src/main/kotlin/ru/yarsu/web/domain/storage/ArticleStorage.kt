@@ -111,20 +111,7 @@ class ArticleStorage(articles: List<Article>) {
     Оперирует: строение ArticleStorage
      */
     fun newIdForStorage(): Int {
-        return newIdForCollection(getAllArticles())
-    }
-
-    /*!
-    Тип: вычисление
-    Функция по получению свободного ID среди предложенной коллекции
-    Оперирует: бизнес-логика
-     */
-    fun newIdForCollection(articles: List<Article>): Int {
-        val ids = articles.map { it.id }.toSet()
-        var id = ids.maxOrNull()?.plus(1) ?: 1
-        while (id in ids)
-            id += 1
-        return id
+        return newIdForMap(articlesMap)
     }
 
     /*!
@@ -184,7 +171,6 @@ class ArticleStorage(articles: List<Article>) {
     /*!
     Тип: действие (вызывает действие)
     Функция по обновлению существующей статьи и сохранению её в хранилище.
-    Оперирует: Article, String, ArticleCreationParams, String, List<Int>, List<Int> -> Int
     */
     fun updateArticleAndPush(
         originalArticle: Article,
@@ -195,7 +181,6 @@ class ArticleStorage(articles: List<Article>) {
         tags: List<Int>,
         chapters: List<Int>
     ): Int {
-        // 1. Чистое вычисление: создаем новую версию статьи на основе старой
         val updatedArticle = originalArticle.copy(
             nameArt = newName,
             censorAge = creationParams.age,
@@ -206,7 +191,6 @@ class ArticleStorage(articles: List<Article>) {
             tagsArt = tags,
             chapters = chapters
         )
-        // 2. Действие: сохраняем (перезаписываем по тому же ID)
         return addArticleToStorage(updatedArticle)
     }
 

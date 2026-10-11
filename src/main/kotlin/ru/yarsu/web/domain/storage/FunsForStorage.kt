@@ -28,7 +28,7 @@ fun <IN: Any> addValueToMap(id: Int, element: IN, storage: Map<Int, IN>) =
 /*!
 Тип: вычисление
  */
-fun newIdForMap(list: Map<Int, *>): Int {
+fun newIdForMap(list: Map<Int, Any>): Int {
     val ids = list.keys
     var id = ids.maxOrNull()?.plus(1) ?: 1
     while (id in ids)
