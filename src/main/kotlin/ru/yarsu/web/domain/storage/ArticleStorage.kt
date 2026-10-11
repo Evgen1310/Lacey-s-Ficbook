@@ -34,6 +34,16 @@ class ArticleStorage(articles: List<Article>) {
     }
 
     /*!
+    Тип: действие
+    Функция по удалению статьи и её глав из хранилищ
+    Оперирует: строение ArticleStorage, строение AddonStorage
+     */
+    fun deleteArticleAndChapters(article: Article, addon: AddonStorage) {
+        deleteArticle(article.id)
+        addon.handleArticleDeletion(article)
+    }
+
+    /*!
     Функция по удалению статьи из предложенной коллекции
     Оперирует: бизнес-логика
      */

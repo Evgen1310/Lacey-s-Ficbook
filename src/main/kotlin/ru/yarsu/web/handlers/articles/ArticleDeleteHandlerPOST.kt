@@ -34,8 +34,9 @@ class ArticleDeleteHandlerPOST(
                 val permissionsStatus = checkPermissionForArticleEditing(permissions, login, article.user)
                 if (permissionsStatus != OK)
                     return Response(permissionsStatus)
-                addon.removeChapters(article.chapters)
-                storage.deleteArticle(article.id)
+
+                storage.deleteArticleAndChapters(article, addon)
+
                 return Response(FOUND).header("Location", "/articles")
             } ?: return Response(NOT_FOUND)
     }
