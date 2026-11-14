@@ -68,10 +68,10 @@ class RegisterHandlerPOST(
         if (lensOrNull(passwordInitField, form) != lensOrNull(passwordConfField, form)) {
             errors.add("passwordDiff")
         }
-        if (userStorage.checkLoginInStorage(lensOrNull(loginField, form))) {
+        if (userStorage.checkLogin(lensOrNull(loginField, form))) {
             errors.add("loginExist")
         }
-        if (userStorage.checkNicknameInStorage(lensOrNull(nicknameField, form))) {
+        if (userStorage.checkNickname(lensOrNull(nicknameField, form))) {
             errors.add("nicknameExist")
         }
         return errors

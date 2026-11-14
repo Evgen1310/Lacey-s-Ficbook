@@ -15,15 +15,15 @@ class UserStorage(
     private var usersMap: Map<String, User> = users.associateBy({ it.login }, { it })
 
     /*!
-    Тип: действие (вызывает действие)
+    Тип: действие (вызывает действие), des: вызов извне, не знает про структуру чего либо
     Функция по получению пользователя по его логину.
     Является обёрткой к getUserFromStorage()
-    Оперирует: строение UserStorage
+    Оперирует: идентификатор User
      */
     fun getUser(login: String): User? = getUserFromStorage(login)
 
     /*!
-    Тип: действие
+    Тип: действие, des: действие внутри хранилища, знает структуру хранилища
     Функция по получению пользователя из хранилища по логину
     Оперирует: строение UserStorage
      */
@@ -45,6 +45,7 @@ class UserStorage(
     Функция по добавлению/изменения объекта User в хранилище
     Оперирует: строение UserStorage
      */
+    // TODO: СДЕЛАТЬ PRIVATE
     fun addUserToStorage(user: User) {
         usersMap = addUserAndGetStorage(user, usersMap)
     }
@@ -54,7 +55,7 @@ class UserStorage(
     Функция по добавлению объекта User в подаваемую коллекцию
     Оперирует: бизнес-логика
      */
-    fun addUserAndGetStorage(user: User, usersCollection: Map<String, User>) =
+    private fun addUserAndGetStorage(user: User, usersCollection: Map<String, User>) =
         usersCollection + (user.login to user)
 
     /*!
@@ -62,14 +63,14 @@ class UserStorage(
     Функция по получению всех занятых никнеймов у пользователей из хранилища
     Оперирует: структура UserStorage
      */
-    fun getAllNicknames() = usersMap.values.map { it.nickName }.toSet()
+    private fun getAllNicknames() = usersMap.values.map { it.nickName }.toSet()
 
     /*!
     Тип: действие
     Функция по получению всех занятых логинов у пользователей из хранилища
     Оперирует: структура UserStorage
      */
-    fun getAllLogins() = usersMap.keys
+    private fun getAllLogins() = usersMap.keys
 
     /*!
     Тип: действие (вызывает действие)
@@ -87,7 +88,7 @@ class UserStorage(
     Функция по созданию копии User с обновлёнными данными
     Оперирует: строение User
      */
-    fun createCopyOfUser(user: User, nickname: String, password: String, about: String, role: Int): User {
+    private fun createCopyOfUser(user: User, nickname: String, password: String, about: String, role: Int): User {
         return user.copy(
             nickName = nickname,
             password = password,
@@ -101,7 +102,7 @@ class UserStorage(
     Функция для создания объекта User
     Оперирует: строение User
      */
-    fun createUser(
+    private fun createUser(
         nickname: String,
         login: String,
         password: String,
@@ -125,6 +126,7 @@ class UserStorage(
     Является обёрткой для createUser()
     Оперирует: строение UserStorage (passwordHandler)
      */
+    //TODO: СДЕЛАТЬ PRIVATE, сделать registrateUser = createUserWithPassword + addUserToStorage
     fun createUserWithPassword(
         nickname: String,
         login: String,
@@ -149,8 +151,8 @@ class UserStorage(
     Является обёрткой для checkLogin()
     Оперирует: строение UserStorage
      */
-    fun checkLoginInStorage(login: String?): Boolean {
-        return checkLogin(login, getAllLogins())
+    fun checkLogin(login: String?): Boolean {
+        return checkLoginInStorage(login, getAllLogins())
     }
 
     /*!
@@ -158,7 +160,7 @@ class UserStorage(
     Функция по проверке существования логина среди предложенной коллекции
     Оперирует: бизнес-логика
      */
-    fun checkLogin(login: String?, logins: Collection<String>): Boolean {
+    fun checkLoginInStorage(login: String?, logins: Collection<String>): Boolean {
         return login in logins
     }
 
@@ -168,8 +170,8 @@ class UserStorage(
     Является обёрткой для checkNickname()
     Оперирует: строение UserStorage
      */
-    fun checkNicknameInStorage(nickname: String?, ignore: String? = null): Boolean {
-        return checkNickname(nickname, ignore, getAllNicknames())
+    fun checkNickname(nickname: String?, ignore: String? = null): Boolean {
+        return checkNicknameInStorage(nickname, ignore, getAllNicknames())
     }
 
     /*!
@@ -178,7 +180,7 @@ class UserStorage(
     Является обёрткой для checkValueInCollectionsWithIgnore()
     Оперирует: бизнес-правило
      */
-    fun checkNickname(nickname: String?, ignore: String? = null, nicksCollection: Collection<String>): Boolean {
+    fun checkNicknameInStorage(nickname: String?, ignore: String? = null, nicksCollection: Collection<String>): Boolean {
         return checkValueInCollectionsWithIgnore(nickname, ignore, nicksCollection)
     }
 
