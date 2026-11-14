@@ -21,7 +21,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по получению статьи из хранилища по её ID
     Оперирует: строение ArticleStorage
      */
-    fun getArticleFromStorage(id: Int): Article? = getValueFromMap(id, articlesMap)
+    private fun getArticleFromStorage(id: Int): Article? = getValueFromMap(id, articlesMap)
 
     /*!
     Тип: действие
@@ -45,7 +45,7 @@ class ArticleStorage(articles: List<Article>) {
     Является обёрткой для removeValueFromMap()
     Оперирует: бизнес-логика
      */
-    fun removeArticleAndGetStorage(id: Int, storage: Map<Int, Article>) =
+    private fun removeArticleAndGetStorage(id: Int, storage: Map<Int, Article>) =
         removeValueFromMap(id, storage)
 
     /*!
@@ -65,7 +65,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по сортировке и фильтрации предложенной коллекции статей
     Оперирует: ?
      */
-    fun sortAndFilterArticles(articles: List<Article>, filterParams: FilterParams): List<Article> {
+    private fun sortAndFilterArticles(articles: List<Article>, filterParams: FilterParams): List<Article> {
         var result = sortArticlesByDate(articles)
         if (filterParams.error) {
             return result
@@ -80,7 +80,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по сортировке предложенной коллекции статей по свежести дат
     Оперирует: строение Article
      */
-    fun sortArticlesByDate(articles: List<Article>): List<Article> {
+    private fun sortArticlesByDate(articles: List<Article>): List<Article> {
         return articles.sortedWith { o1, o2 -> o1.dateAdd.compareTo(o2.dateAdd) }
     }
 
@@ -89,7 +89,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по фильтрации предложенной коллекции статей по ID возрастных ограничений
     Оперирует: строение Article
      */
-    fun filterArticlesByAge(articles: List<Article>, ageParams: List<Int>): List<Article> {
+    private fun filterArticlesByAge(articles: List<Article>, ageParams: List<Int>): List<Article> {
         return if (ageParams.isEmpty()) {
             articles
         } else {
@@ -102,7 +102,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по фильтрации предложенной коллекции статей по ID форм
     Оперирует: строение Article
      */
-    fun filterArticlesByForm(articles: List<Article>, formParams: List<Int>): List<Article> {
+    private fun filterArticlesByForm(articles: List<Article>, formParams: List<Int>): List<Article> {
         return if (formParams.isEmpty()) {
             articles
         } else {
@@ -115,7 +115,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по получению свободного ID среди статей хранилища
     Оперирует: строение ArticleStorage
      */
-    fun newIdForStorage(): Int {
+    private fun newIdForStorage(): Int {
         return newIdForMap(articlesMap)
     }
 
@@ -125,7 +125,7 @@ class ArticleStorage(articles: List<Article>) {
     Является обёрткой для addArticleAndGetStorage()
     Оперирует: структура ArticleStorage
      */
-    fun addArticleToStorage(article: Article): Int {
+    private fun addArticleToStorage(article: Article): Int {
         articlesMap = addArticleAndGetStorage(article, articlesMap)
         return article.id
     }
@@ -152,7 +152,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по созданию объекта класса Article из параметров
     Оперирует: структура Article
      */
-    fun createArticle(
+    private fun createArticle(
         dateTime: LocalDateTime,
         name: String,
         creationParams: ArticleCreationParams,
@@ -205,7 +205,7 @@ class ArticleStorage(articles: List<Article>) {
     Является обёрткой для addValueToMap()
     Оперирует: ?
      */
-    fun addArticleAndGetStorage(article: Article, storage: Map<Int, Article>) =
+    private fun addArticleAndGetStorage(article: Article, storage: Map<Int, Article>) =
         addValueToMap(article.id, article, storage)
 
     /*!
