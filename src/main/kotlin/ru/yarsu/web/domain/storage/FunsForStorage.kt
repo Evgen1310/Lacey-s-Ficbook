@@ -23,6 +23,12 @@ fun <IN: Any, OUT> getAllValuesFromMap(storage: Map<OUT, IN>): List<IN> =
 
 /*!
 Тип: вычисление
+ */
+fun <IN: Any, OUT> getAllKeysFromMap(storage: Map<OUT, IN>): List<OUT> =
+    storage.keys.toList()
+
+/*!
+Тип: вычисление
 Функция по удалению элемента из предложенной коллекции Max<Int, Any>
 Оперирует: бизнес-логика
  */

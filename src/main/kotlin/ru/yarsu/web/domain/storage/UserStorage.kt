@@ -81,7 +81,7 @@ class UserStorage(
     Тип: вычисление, des: работа с объектами User, знает про строение User
      */
     private fun getAllLoginsFromCollection(collection: Map<String, User>)
-            = collection.keys.toSet()
+            = getAllKeysFromMap(collection)
 
     /*!
     Тип: действие (вызывает действие), des: вызов извне, TODO: !!!знает про структуру User (user.password)!!!
