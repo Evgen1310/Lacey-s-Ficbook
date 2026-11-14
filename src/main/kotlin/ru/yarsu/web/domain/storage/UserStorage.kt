@@ -59,18 +59,30 @@ class UserStorage(
         usersCollection + (user.login to user)
 
     /*!
-    Тип: действие
+    Тип: действие, des: действие внутри хранилища,
     Функция по получению всех занятых никнеймов у пользователей из хранилища
     Оперирует: структура UserStorage
      */
-    private fun getAllNicknames() = usersMap.values.map { it.nickName }.toSet()
+    private fun getAllNicknames() = getAllNicknamesFromCollection(usersMap)
 
     /*!
-    Тип: действие
+    Тип: вычисление, des: работа с объектами User, знает про строение User
+     */
+    private fun getAllNicknamesFromCollection(collection: Map<String, User>)
+        = collection.values.map { it.nickName }.toSet()
+
+    /*!
+    Тип: действие, des: действие внутри хранилища,
     Функция по получению всех занятых логинов у пользователей из хранилища
     Оперирует: структура UserStorage
      */
-    private fun getAllLogins() = usersMap.keys
+    private fun getAllLogins() = getAllLoginsFromCollection(usersMap)
+
+    /*!
+    Тип: вычисление, des: работа с объектами User, знает про строение User
+     */
+    private fun getAllLoginsFromCollection(collection: Map<String, User>)
+            = collection.keys
 
     /*!
     Тип: действие (вызывает действие), des: вызов извне, TODO: !!!знает про структуру User (user.password)!!!
@@ -152,7 +164,7 @@ class UserStorage(
     }
 
     /*!
-    Тип: действие
+    Тип: действие, des: вызов из вне, не оперирует строением чего либо
     Функция по проверке существования логика среди хранилища.
     Является обёрткой для checkLogin()
     Оперирует: строение UserStorage
@@ -167,7 +179,7 @@ class UserStorage(
     Оперирует: бизнес-логика
      */
     fun checkLoginInStorage(login: String?, logins: Collection<String>): Boolean {
-        return login in logins
+        return checkValueInCollectionsWithIgnore(login, null, logins)
     }
 
     /*!
