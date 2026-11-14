@@ -3,6 +3,7 @@ package ru.yarsu.web.domain.storage
 import ru.yarsu.web.domain.FilterParams
 import ru.yarsu.web.domain.article.Article
 import ru.yarsu.web.domain.article.ArticleCreationParams
+import ru.yarsu.web.users.User
 import java.time.LocalDateTime
 import kotlin.math.ceil
 
@@ -186,7 +187,33 @@ class ArticleStorage(articles: List<Article>) {
         tags: List<Int>,
         chapters: List<Int>
     ): Int {
-        val updatedArticle = originalArticle.copy(
+        val updatedArticle = createCopyOfArticle(
+            article = originalArticle,
+            newName = newName,
+            creationParams = creationParams,
+            annotation = annotation,
+            login = login,
+            tags = tags,
+            chapters = chapters
+        )
+        return addArticleToStorage(updatedArticle)
+    }
+
+    /*!
+    Тип: вычисление
+    Функция по созданию копии Article с обновлёнными данными
+    Оперирует: строение Article
+     */
+    private fun createCopyOfArticle(
+        article: Article,
+        newName: String = article.nameArt,
+        creationParams: ArticleCreationParams = ArticleCreationParams(article.censorAge, article.formArt, article.genre),
+        annotation: String = article.annotation,
+        login: String = article.user,
+        tags: List<Int> = article.tagsArt,
+        chapters: List<Int> = article.chapters
+    ): Article {
+        return article.copy(
             nameArt = newName,
             censorAge = creationParams.age,
             formArt = creationParams.form,
@@ -196,7 +223,6 @@ class ArticleStorage(articles: List<Article>) {
             tagsArt = tags,
             chapters = chapters
         )
-        return addArticleToStorage(updatedArticle)
     }
 
     /*!
