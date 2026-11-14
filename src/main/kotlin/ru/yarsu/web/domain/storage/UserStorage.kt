@@ -191,7 +191,7 @@ class UserStorage(
     Функция по проверке существования логина среди предложенной коллекции
     Оперирует: бизнес-логика
      */
-    fun checkLoginInStorage(login: String?, logins: Collection<String>): Boolean {
+    private fun checkLoginInStorage(login: String?, logins: Collection<String>): Boolean {
         return checkValueInCollectionsWithIgnore(login, null, logins)
     }
 
@@ -211,7 +211,7 @@ class UserStorage(
     Является обёрткой для checkValueInCollectionsWithIgnore()
     Оперирует: бизнес-правило
      */
-    fun checkNicknameInStorage(nickname: String?, ignore: String? = null, nicksCollection: Collection<String>): Boolean {
+    private fun checkNicknameInStorage(nickname: String?, ignore: String? = null, nicksCollection: Collection<String>): Boolean {
         return checkValueInCollectionsWithIgnore(nickname, ignore, nicksCollection)
     }
 
@@ -231,7 +231,7 @@ class UserStorage(
     Функция по созданию объекта UserInfo из объекта User
     Оперирует: строение UserInfo
      */
-    fun createUserInfo(login: String?, nickname: String?, about: String?): UserInfo {
+    private fun createUserInfo(login: String?, nickname: String?, about: String?): UserInfo {
         return UserInfo(
             login ?: "",
             nickname ?: "",
@@ -260,7 +260,7 @@ class UserStorage(
     Функция по созданию одного объекта класса UserWithData
     Оперирует: строение UserWithData
      */
-    fun createUserWithData(user: User): UserWithData {
+    private fun createUserWithData(user: User): UserWithData {
         return UserWithData(
             user,
             RolesEnums.from(user.role)?.role ?: "Аноним"
@@ -280,7 +280,7 @@ class UserStorage(
     /*!
     Тип: действие
      */
-    fun getAllUsers(): List<User>
+    private fun getAllUsers(): List<User>
         = getAllValuesFromMap(usersMap)
 
     /*!
@@ -301,7 +301,7 @@ class UserStorage(
     Является оболочкой valuesByPage()
     Оперирует: бизнес-правила, константой INPAGE_DOP
      */
-    fun usersByPage(
+    private fun usersByPage(
         pageNumber: Int,
         userList: List<User>,
     ): List<User> {
