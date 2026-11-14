@@ -59,7 +59,8 @@ class RegisterHandlerPOST(
                 lensOrDefault(aboutField, form, ""),
                 LocalDateTime.now()
             )
-        userStorage.addUserToStorage(user)
+        // TODO: добавить registrateUser
+        userStorage.addUserToStorage(user
         return Response(Status.FOUND).header("Location", "/login")
     }
 

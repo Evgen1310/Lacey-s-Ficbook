@@ -30,13 +30,13 @@ class UserStorage(
     private fun getUserFromStorage(login: String): User? = usersMap[login]
 
     /*!
-    Тип: действие (вызывает действие)
+    Тип: действие (вызывает действие), des: вызов извне, не знает про структуру чего либо
     Функция для изменения роли пользователя.
     Требует объект класса User
-    Оперирует: строение User, строение UserStorage (транзитивно)
+    Оперирует:
      */
     fun changeUserRole(user: User, roleNew: Int) {
-        val updatedUser = user.copy(role = roleNew)
+        val updatedUser = createCopyOfUser(user, role = roleNew)
         addUserToStorage(updatedUser)
     }
 
@@ -88,7 +88,13 @@ class UserStorage(
     Функция по созданию копии User с обновлёнными данными
     Оперирует: строение User
      */
-    private fun createCopyOfUser(user: User, nickname: String, password: String, about: String, role: Int): User {
+    private fun createCopyOfUser(
+        user: User,
+        nickname: String = user.nickName,
+        password: String = user.password,
+        about: String = user.about,
+        role: Int = user.role
+    ): User {
         return user.copy(
             nickName = nickname,
             password = password,
