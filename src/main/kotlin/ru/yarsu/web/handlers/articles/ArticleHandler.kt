@@ -32,7 +32,7 @@ class ArticleHandler(
         val userInfo = userStorage.getUserInfo(userLens(request)?.login ?: "")
 
         lensOrNull(pathLens, request)
-            ?.let { id -> storage.getArticleFromStorage(id) }
+            ?.let { id -> storage.getArticle(id) }
             ?.let { article ->
                 val page = lensOrDefault(pageLens, request, 0).takeIf { it > -1 } ?: 0
                 val chapters = addon.getChaptersOrDefault(article.chapters)

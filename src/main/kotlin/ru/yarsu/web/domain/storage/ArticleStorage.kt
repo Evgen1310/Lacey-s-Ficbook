@@ -13,10 +13,15 @@ class ArticleStorage(articles: List<Article>) {
 
     /*!
     Тип: действие
+     */
+    fun getArticle(id: Int): Article? = getArticleFromStorage(id)
+
+    /*!
+    Тип: действие
     Функция по получению статьи из хранилища по её ID
     Оперирует: строение ArticleStorage
      */
-    fun getArticleFromStorage(id: Int): Article? = articlesMap[id]
+    fun getArticleFromStorage(id: Int): Article? = getValueFromMap(id, articlesMap)
 
     /*!
     Тип: действие
@@ -223,21 +228,5 @@ class ArticleStorage(articles: List<Article>) {
         articles: List<Article>,
     ): List<Article> {
         return valuesByPage(pageNumber, articles)
-    }
-
-    /*!
-    Тип: вычисление
-    Функция по добавлению списка тэгов и глав в предложенный объект Article
-    Оперирует: строение Article
-     */
-    fun addTagsAndChaptersToArticle(
-        articleToDo: Article,
-        tags: List<Int>,
-        chapters: List<Int>,
-    ): Article {
-        return articleToDo.copy(
-            tagsArt = tags,
-            chapters = chapters
-        )
     }
 }
