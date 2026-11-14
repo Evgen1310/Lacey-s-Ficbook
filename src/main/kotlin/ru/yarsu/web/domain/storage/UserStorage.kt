@@ -274,8 +274,14 @@ class UserStorage(
     Оперирует: строение UserStorage
      */
     fun getPageAmountFromStorage(): Int{
-        return getPageAmount(INPAGE_DOP, usersMap.values)
+        return getPageAmount(INPAGE_DOP, getAllUsers())
     }
+
+    /*!
+    Тип: действие
+     */
+    fun getAllUsers(): List<User>
+        = getAllValuesFromMap(usersMap)
 
     /*!
     Тип: действие
@@ -286,8 +292,7 @@ class UserStorage(
     fun usersByPageNumberFromStorage(
         pageNumber: Int,
     ): List<User> {
-        val users = usersMap.map { it.value }
-        return usersByPage(pageNumber, users)
+        return usersByPage(pageNumber, getAllUsers())
     }
 
     /*!
