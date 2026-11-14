@@ -28,7 +28,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по получению всех статей из хранилища
     Оперирует: строение ArticleStorage
      */
-    fun getAllArticles() = articlesMap.values.toList()
+    fun getAllArticles() = getAllValuesFromMap(articlesMap)
 
     /*!
     Тип: действие
