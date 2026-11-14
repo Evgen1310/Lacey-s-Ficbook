@@ -27,7 +27,7 @@ class UserStorage(
     Функция по получению пользователя из хранилища по логину
     Оперирует: строение UserStorage
      */
-    private fun getUserFromStorage(login: String): User? = usersMap[login]
+    private fun getUserFromStorage(login: String): User? = getValueFromMap(login, usersMap)
 
     /*!
     Тип: действие (вызывает действие), des: вызов извне, не знает про структуру чего либо

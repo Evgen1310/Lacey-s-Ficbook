@@ -11,6 +11,12 @@ fun <IN: Any> checkValueInCollectionsWithIgnore (value: IN?, ignore: IN? = null,
 
 /*!
 Тип: вычисление
+ */
+fun <IN: Any, OUT> getValueFromMap(id: OUT, storage: Map<OUT, IN>): IN? =
+    storage[id]
+
+/*!
+Тип: вычисление
 Функция по удалению элемента из предложенной коллекции Max<Int, Any>
 Оперирует: бизнес-логика
  */
