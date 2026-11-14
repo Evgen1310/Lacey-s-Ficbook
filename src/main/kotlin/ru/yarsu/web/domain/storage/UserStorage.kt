@@ -56,7 +56,7 @@ class UserStorage(
     Оперирует: бизнес-логика
      */
     private fun addUserAndGetStorage(user: User, usersCollection: Map<String, User>) =
-        usersCollection + (user.login to user)
+        addValueToMap(user.login, user, usersCollection)
 
     /*!
     Тип: действие, des: действие внутри хранилища,

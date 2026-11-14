@@ -22,7 +22,7 @@ fun <IN: Any> removeValueFromMap(id: Int, storage: Map<Int, IN>) =
 Функция по добавлению элемента в предложенную коллекцию Max<Int, Any>
 Оперирует: бизнес-логика
  */
-fun <IN: Any> addValueToMap(id: Int, element: IN, storage: Map<Int, IN>) =
+fun <IN: Any, OUT> addValueToMap(id: OUT, element: IN, storage: Map<OUT, IN>) =
     storage + (id to element)
 
 /*!
