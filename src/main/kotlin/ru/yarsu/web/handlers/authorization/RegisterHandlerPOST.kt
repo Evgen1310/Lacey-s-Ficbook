@@ -51,16 +51,15 @@ class RegisterHandlerPOST(
                 )
             return Response(Status.OK).with(htmlView(request) of viewModel)
         }
-        val user =
-            userStorage.createUserWithPassword(
-                nicknameField(form),
-                loginField(form),
-                passwordInitField(form),
-                lensOrDefault(aboutField, form, ""),
-                LocalDateTime.now()
-            )
-        // TODO: добавить registrateUser
-        userStorage.addUserToStorage(user
+
+        userStorage.registerUser(
+            nicknameField(form),
+            loginField(form),
+            passwordInitField(form),
+            lensOrDefault(aboutField, form, ""),
+            LocalDateTime.now()
+        )
+
         return Response(Status.FOUND).header("Location", "/login")
     }
 

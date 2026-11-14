@@ -45,8 +45,7 @@ class UserStorage(
     Функция по добавлению/изменения объекта User в хранилище
     Оперирует: строение UserStorage
      */
-    // TODO: СДЕЛАТЬ PRIVATE
-    fun addUserToStorage(user: User) {
+    private fun addUserToStorage(user: User) {
         usersMap = addUserAndGetStorage(user, usersMap)
     }
 
@@ -144,8 +143,7 @@ class UserStorage(
     Является обёрткой для createUser()
     Оперирует: строение UserStorage (passwordHandler)
      */
-    //TODO: СДЕЛАТЬ PRIVATE, сделать registrateUser = createUserWithPassword + addUserToStorage
-    fun createUserWithPassword(
+    private fun createUserWithPassword(
         nickname: String,
         login: String,
         password: String,
@@ -161,6 +159,21 @@ class UserStorage(
             date,
             role,
         )
+    }
+
+    /*!
+    Тип: действие
+     */
+    fun registerUser(
+        nickname: String,
+        login: String,
+        password: String,
+        about: String,
+        date: LocalDateTime,
+        role: Int = RolesEnums.AUTHOR.id,
+    ) {
+        val newUser = createUserWithPassword(nickname, login, password, about, date, role)
+        addUserToStorage(newUser)
     }
 
     /*!
