@@ -36,8 +36,7 @@ class UserStorage(
     Оперирует:
      */
     fun changeUserRole(user: User, roleNew: Int) {
-        val updatedUser = createCopyOfUser(user, role = roleNew)
-        addUserToStorage(updatedUser)
+        changeUser(user, role = roleNew)
     }
 
     /*!
@@ -88,7 +87,13 @@ class UserStorage(
     Функция по обновлению данных пользователя в хранилище
     Оперирует: строение User, строение UserStorage (транзитивно)
      */
-    fun changeUser(user: User, nickname: String, password: String, about: String, role: Int) {
+    fun changeUser(
+        user: User,
+        nickname: String = user.nickName,
+        password: String = "",
+        about: String = user.about,
+        role: Int = user.role
+    ) {
         val passwordNew = passwordHandler.createNewPasswordOrReturnOld(password, user.password)
         val updatedUser = createCopyOfUser(user, nickname, passwordNew, about, role)
         addUserToStorage(updatedUser)
