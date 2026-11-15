@@ -20,7 +20,7 @@ class UserUnBlockHandlerPOST(private val userStorage: UserStorage) :
                     ?.let { user ->
                         if (RolesEnums.from(user.role) == RolesEnums.ADMIN)
                             return Response(Status.UNAUTHORIZED)
-                        userStorage.changeUserRole(user, RolesEnums.AUTHOR.id)
+                        userStorage.changeUser(user, role = RolesEnums.AUTHOR.id)
                         return Response(Status.FOUND).header("Location", "/users")
                     }
             } ?: return Response(Status.NOT_FOUND)

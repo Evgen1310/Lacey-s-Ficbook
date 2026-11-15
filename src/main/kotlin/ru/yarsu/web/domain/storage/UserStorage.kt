@@ -30,16 +30,6 @@ class UserStorage(
     private fun getUserFromStorage(login: String): User? = getValueFromMap(login, usersMap)
 
     /*!
-    Тип: действие (вызывает действие), des: вызов извне, не знает про структуру чего либо
-    Функция для изменения роли пользователя.
-    Требует объект класса User
-    Оперирует:
-     */
-    fun changeUserRole(user: User, roleNew: Int) {
-        changeUser(user, role = roleNew)
-    }
-
-    /*!
     Тип: действие
     Функция по добавлению/изменения объекта User в хранилище
     Оперирует: строение UserStorage
