@@ -15,37 +15,26 @@ class UserStorage(
     private var usersMap: Map<String, User> = users.associateBy({ it.login }, { it })
 
     /*!
-    Тип: действие (вызывает действие)
+    Тип: действие (вызывает действие), des: вызов извне, не знает про структуру чего либо
     Функция по получению пользователя по его логину.
     Является обёрткой к getUserFromStorage()
-    Оперирует: строение UserStorage
+    Оперирует: идентификатор User
      */
     fun getUser(login: String): User? = getUserFromStorage(login)
 
     /*!
-    Тип: действие
+    Тип: действие, des: действие внутри хранилища, знает структуру хранилища
     Функция по получению пользователя из хранилища по логину
     Оперирует: строение UserStorage
      */
-    private fun getUserFromStorage(login: String): User? = usersMap[login]
-
-    /*!
-    Тип: действие (вызывает действие)
-    Функция для изменения роли пользователя.
-    Требует объект класса User
-    Оперирует: строение User, строение UserStorage (транзитивно)
-     */
-    fun changeUserRole(user: User, roleNew: Int) {
-        val updatedUser = user.copy(role = roleNew)
-        addUserToStorage(updatedUser)
-    }
+    private fun getUserFromStorage(login: String): User? = getValueFromMap(login, usersMap)
 
     /*!
     Тип: действие
     Функция по добавлению/изменения объекта User в хранилище
     Оперирует: строение UserStorage
      */
-    fun addUserToStorage(user: User) {
+    private fun addUserToStorage(user: User) {
         usersMap = addUserAndGetStorage(user, usersMap)
     }
 
@@ -54,29 +43,47 @@ class UserStorage(
     Функция по добавлению объекта User в подаваемую коллекцию
     Оперирует: бизнес-логика
      */
-    fun addUserAndGetStorage(user: User, usersCollection: Map<String, User>) =
-        usersCollection + (user.login to user)
+    private fun addUserAndGetStorage(user: User, usersCollection: Map<String, User>) =
+        addValueToMap(user.login, user, usersCollection)
 
     /*!
-    Тип: действие
+    Тип: действие, des: действие внутри хранилища,
     Функция по получению всех занятых никнеймов у пользователей из хранилища
     Оперирует: структура UserStorage
      */
-    fun getAllNicknames() = usersMap.values.map { it.nickName }.toSet()
+    private fun getAllNicknames() = getAllNicknamesFromCollection(usersMap)
 
     /*!
-    Тип: действие
+    Тип: вычисление, des: работа с объектами User, знает про строение User
+     */
+    private fun getAllNicknamesFromCollection(collection: Map<String, User>)
+        = collection.values.map { it.nickName }.toSet()
+
+    /*!
+    Тип: действие, des: действие внутри хранилища,
     Функция по получению всех занятых логинов у пользователей из хранилища
     Оперирует: структура UserStorage
      */
-    fun getAllLogins() = usersMap.keys
+    private fun getAllLogins() = getAllLoginsFromCollection(usersMap)
 
     /*!
-    Тип: действие (вызывает действие)
+    Тип: вычисление, des: работа с объектами User, знает про строение User
+     */
+    private fun getAllLoginsFromCollection(collection: Map<String, User>)
+            = getAllKeysFromMap(collection)
+
+    /*!
+    Тип: действие (вызывает действие), des: вызов извне, TODO: !!!знает про структуру User (user.password)!!!
     Функция по обновлению данных пользователя в хранилище
     Оперирует: строение User, строение UserStorage (транзитивно)
      */
-    fun changeUser(user: User, nickname: String, password: String, about: String, role: Int) {
+    fun changeUser(
+        user: User,
+        nickname: String = user.nickName,
+        password: String = "",
+        about: String = user.about,
+        role: Int = user.role
+    ) {
         val passwordNew = passwordHandler.createNewPasswordOrReturnOld(password, user.password)
         val updatedUser = createCopyOfUser(user, nickname, passwordNew, about, role)
         addUserToStorage(updatedUser)
@@ -87,7 +94,13 @@ class UserStorage(
     Функция по созданию копии User с обновлёнными данными
     Оперирует: строение User
      */
-    fun createCopyOfUser(user: User, nickname: String, password: String, about: String, role: Int): User {
+    private fun createCopyOfUser(
+        user: User,
+        nickname: String = user.nickName,
+        password: String = user.password,
+        about: String = user.about,
+        role: Int = user.role
+    ): User {
         return user.copy(
             nickName = nickname,
             password = password,
@@ -101,7 +114,7 @@ class UserStorage(
     Функция для создания объекта User
     Оперирует: строение User
      */
-    fun createUser(
+    private fun createUser(
         nickname: String,
         login: String,
         password: String,
@@ -125,7 +138,7 @@ class UserStorage(
     Является обёрткой для createUser()
     Оперирует: строение UserStorage (passwordHandler)
      */
-    fun createUserWithPassword(
+    private fun createUserWithPassword(
         nickname: String,
         login: String,
         password: String,
@@ -145,12 +158,27 @@ class UserStorage(
 
     /*!
     Тип: действие
+     */
+    fun registerUser(
+        nickname: String,
+        login: String,
+        password: String,
+        about: String,
+        date: LocalDateTime,
+        role: Int = RolesEnums.AUTHOR.id,
+    ) {
+        val newUser = createUserWithPassword(nickname, login, password, about, date, role)
+        addUserToStorage(newUser)
+    }
+
+    /*!
+    Тип: действие, des: вызов из вне, не оперирует строением чего либо
     Функция по проверке существования логика среди хранилища.
     Является обёрткой для checkLogin()
     Оперирует: строение UserStorage
      */
-    fun checkLoginInStorage(login: String?): Boolean {
-        return checkLogin(login, getAllLogins())
+    fun checkLogin(login: String?): Boolean {
+        return checkLoginInStorage(login, getAllLogins())
     }
 
     /*!
@@ -158,8 +186,8 @@ class UserStorage(
     Функция по проверке существования логина среди предложенной коллекции
     Оперирует: бизнес-логика
      */
-    fun checkLogin(login: String?, logins: Collection<String>): Boolean {
-        return login in logins
+    private fun checkLoginInStorage(login: String?, logins: Collection<String>): Boolean {
+        return checkValueInCollectionsWithIgnore(login, null, logins)
     }
 
     /*!
@@ -168,8 +196,8 @@ class UserStorage(
     Является обёрткой для checkNickname()
     Оперирует: строение UserStorage
      */
-    fun checkNicknameInStorage(nickname: String?, ignore: String? = null): Boolean {
-        return checkNickname(nickname, ignore, getAllNicknames())
+    fun checkNickname(nickname: String?, ignore: String? = null): Boolean {
+        return checkNicknameInStorage(nickname, ignore, getAllNicknames())
     }
 
     /*!
@@ -178,7 +206,7 @@ class UserStorage(
     Является обёрткой для checkValueInCollectionsWithIgnore()
     Оперирует: бизнес-правило
      */
-    fun checkNickname(nickname: String?, ignore: String? = null, nicksCollection: Collection<String>): Boolean {
+    private fun checkNicknameInStorage(nickname: String?, ignore: String? = null, nicksCollection: Collection<String>): Boolean {
         return checkValueInCollectionsWithIgnore(nickname, ignore, nicksCollection)
     }
 
@@ -198,7 +226,7 @@ class UserStorage(
     Функция по созданию объекта UserInfo из объекта User
     Оперирует: строение UserInfo
      */
-    fun createUserInfo(login: String?, nickname: String?, about: String?): UserInfo {
+    private fun createUserInfo(login: String?, nickname: String?, about: String?): UserInfo {
         return UserInfo(
             login ?: "",
             nickname ?: "",
@@ -227,7 +255,7 @@ class UserStorage(
     Функция по созданию одного объекта класса UserWithData
     Оперирует: строение UserWithData
      */
-    fun createUserWithData(user: User): UserWithData {
+    private fun createUserWithData(user: User): UserWithData {
         return UserWithData(
             user,
             RolesEnums.from(user.role)?.role ?: "Аноним"
@@ -241,8 +269,14 @@ class UserStorage(
     Оперирует: строение UserStorage
      */
     fun getPageAmountFromStorage(): Int{
-        return getPageAmount(INPAGE_DOP, usersMap.values)
+        return getPageAmount(INPAGE_DOP, getAllUsers())
     }
+
+    /*!
+    Тип: действие
+     */
+    private fun getAllUsers(): List<User>
+        = getAllValuesFromMap(usersMap)
 
     /*!
     Тип: действие
@@ -253,8 +287,7 @@ class UserStorage(
     fun usersByPageNumberFromStorage(
         pageNumber: Int,
     ): List<User> {
-        val users = usersMap.map { it.value }
-        return usersByPage(pageNumber, users)
+        return usersByPage(pageNumber, getAllUsers())
     }
 
     /*!
@@ -263,7 +296,7 @@ class UserStorage(
     Является оболочкой valuesByPage()
     Оперирует: бизнес-правила, константой INPAGE_DOP
      */
-    fun usersByPage(
+    private fun usersByPage(
         pageNumber: Int,
         userList: List<User>,
     ): List<User> {

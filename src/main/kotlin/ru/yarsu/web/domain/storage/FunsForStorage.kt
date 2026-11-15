@@ -11,6 +11,24 @@ fun <IN: Any> checkValueInCollectionsWithIgnore (value: IN?, ignore: IN? = null,
 
 /*!
 Тип: вычисление
+ */
+fun <IN: Any, OUT> getValueFromMap(id: OUT, storage: Map<OUT, IN>): IN? =
+    storage[id]
+
+/*!
+Тип: вычисление
+ */
+fun <IN: Any, OUT> getAllValuesFromMap(storage: Map<OUT, IN>): List<IN> =
+    storage.values.toList()
+
+/*!
+Тип: вычисление
+ */
+fun <IN: Any, OUT> getAllKeysFromMap(storage: Map<OUT, IN>): List<OUT> =
+    storage.keys.toList()
+
+/*!
+Тип: вычисление
 Функция по удалению элемента из предложенной коллекции Max<Int, Any>
 Оперирует: бизнес-логика
  */
@@ -22,7 +40,7 @@ fun <IN: Any> removeValueFromMap(id: Int, storage: Map<Int, IN>) =
 Функция по добавлению элемента в предложенную коллекцию Max<Int, Any>
 Оперирует: бизнес-логика
  */
-fun <IN: Any> addValueToMap(id: Int, element: IN, storage: Map<Int, IN>) =
+fun <IN: Any, OUT> addValueToMap(id: OUT, element: IN, storage: Map<OUT, IN>) =
     storage + (id to element)
 
 /*!

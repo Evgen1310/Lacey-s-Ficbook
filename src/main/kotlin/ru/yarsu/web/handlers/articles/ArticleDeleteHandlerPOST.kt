@@ -28,7 +28,7 @@ class ArticleDeleteHandlerPOST(
         val permissions = permissionsLens(request)
         val login = userLens(request)?.login
         lensOrNull(pathLens, request)
-            ?.let { id -> storage.getArticleFromStorage(id) }
+            ?.let { id -> storage.getArticle(id) }
             ?.let { article ->
 
                 val permissionsStatus = checkPermissionForArticleEditing(permissions, login, article.user)

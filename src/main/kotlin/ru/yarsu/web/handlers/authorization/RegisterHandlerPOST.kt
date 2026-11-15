@@ -51,15 +51,15 @@ class RegisterHandlerPOST(
                 )
             return Response(Status.OK).with(htmlView(request) of viewModel)
         }
-        val user =
-            userStorage.createUserWithPassword(
-                nicknameField(form),
-                loginField(form),
-                passwordInitField(form),
-                lensOrDefault(aboutField, form, ""),
-                LocalDateTime.now()
-            )
-        userStorage.addUserToStorage(user)
+
+        userStorage.registerUser(
+            nicknameField(form),
+            loginField(form),
+            passwordInitField(form),
+            lensOrDefault(aboutField, form, ""),
+            LocalDateTime.now()
+        )
+
         return Response(Status.FOUND).header("Location", "/login")
     }
 
@@ -68,10 +68,10 @@ class RegisterHandlerPOST(
         if (lensOrNull(passwordInitField, form) != lensOrNull(passwordConfField, form)) {
             errors.add("passwordDiff")
         }
-        if (userStorage.checkLoginInStorage(lensOrNull(loginField, form))) {
+        if (userStorage.checkLogin(lensOrNull(loginField, form))) {
             errors.add("loginExist")
         }
-        if (userStorage.checkNicknameInStorage(lensOrNull(nicknameField, form))) {
+        if (userStorage.checkNickname(lensOrNull(nicknameField, form))) {
             errors.add("nicknameExist")
         }
         return errors

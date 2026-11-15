@@ -3,6 +3,7 @@ package ru.yarsu.web.domain.storage
 import ru.yarsu.web.domain.FilterParams
 import ru.yarsu.web.domain.article.Article
 import ru.yarsu.web.domain.article.ArticleCreationParams
+import ru.yarsu.web.users.User
 import java.time.LocalDateTime
 import kotlin.math.ceil
 
@@ -13,17 +14,22 @@ class ArticleStorage(articles: List<Article>) {
 
     /*!
     Тип: действие
+     */
+    fun getArticle(id: Int): Article? = getArticleFromStorage(id)
+
+    /*!
+    Тип: действие
     Функция по получению статьи из хранилища по её ID
     Оперирует: строение ArticleStorage
      */
-    fun getArticleFromStorage(id: Int): Article? = articlesMap[id]
+    private fun getArticleFromStorage(id: Int): Article? = getValueFromMap(id, articlesMap)
 
     /*!
     Тип: действие
     Функция по получению всех статей из хранилища
     Оперирует: строение ArticleStorage
      */
-    fun getAllArticles() = articlesMap.values.toList()
+    fun getAllArticles() = getAllValuesFromMap(articlesMap)
 
     /*!
     Тип: действие
@@ -40,7 +46,7 @@ class ArticleStorage(articles: List<Article>) {
     Является обёрткой для removeValueFromMap()
     Оперирует: бизнес-логика
      */
-    fun removeArticleAndGetStorage(id: Int, storage: Map<Int, Article>) =
+    private fun removeArticleAndGetStorage(id: Int, storage: Map<Int, Article>) =
         removeValueFromMap(id, storage)
 
     /*!
@@ -60,7 +66,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по сортировке и фильтрации предложенной коллекции статей
     Оперирует: ?
      */
-    fun sortAndFilterArticles(articles: List<Article>, filterParams: FilterParams): List<Article> {
+    private fun sortAndFilterArticles(articles: List<Article>, filterParams: FilterParams): List<Article> {
         var result = sortArticlesByDate(articles)
         if (filterParams.error) {
             return result
@@ -75,7 +81,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по сортировке предложенной коллекции статей по свежести дат
     Оперирует: строение Article
      */
-    fun sortArticlesByDate(articles: List<Article>): List<Article> {
+    private fun sortArticlesByDate(articles: List<Article>): List<Article> {
         return articles.sortedWith { o1, o2 -> o1.dateAdd.compareTo(o2.dateAdd) }
     }
 
@@ -84,7 +90,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по фильтрации предложенной коллекции статей по ID возрастных ограничений
     Оперирует: строение Article
      */
-    fun filterArticlesByAge(articles: List<Article>, ageParams: List<Int>): List<Article> {
+    private fun filterArticlesByAge(articles: List<Article>, ageParams: List<Int>): List<Article> {
         return if (ageParams.isEmpty()) {
             articles
         } else {
@@ -97,7 +103,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по фильтрации предложенной коллекции статей по ID форм
     Оперирует: строение Article
      */
-    fun filterArticlesByForm(articles: List<Article>, formParams: List<Int>): List<Article> {
+    private fun filterArticlesByForm(articles: List<Article>, formParams: List<Int>): List<Article> {
         return if (formParams.isEmpty()) {
             articles
         } else {
@@ -110,7 +116,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по получению свободного ID среди статей хранилища
     Оперирует: строение ArticleStorage
      */
-    fun newIdForStorage(): Int {
+    private fun newIdForStorage(): Int {
         return newIdForMap(articlesMap)
     }
 
@@ -120,7 +126,7 @@ class ArticleStorage(articles: List<Article>) {
     Является обёрткой для addArticleAndGetStorage()
     Оперирует: структура ArticleStorage
      */
-    fun addArticleToStorage(article: Article): Int {
+    private fun addArticleToStorage(article: Article): Int {
         articlesMap = addArticleAndGetStorage(article, articlesMap)
         return article.id
     }
@@ -147,7 +153,7 @@ class ArticleStorage(articles: List<Article>) {
     Функция по созданию объекта класса Article из параметров
     Оперирует: структура Article
      */
-    fun createArticle(
+    private fun createArticle(
         dateTime: LocalDateTime,
         name: String,
         creationParams: ArticleCreationParams,
@@ -181,7 +187,33 @@ class ArticleStorage(articles: List<Article>) {
         tags: List<Int>,
         chapters: List<Int>
     ): Int {
-        val updatedArticle = originalArticle.copy(
+        val updatedArticle = createCopyOfArticle(
+            article = originalArticle,
+            newName = newName,
+            creationParams = creationParams,
+            annotation = annotation,
+            login = login,
+            tags = tags,
+            chapters = chapters
+        )
+        return addArticleToStorage(updatedArticle)
+    }
+
+    /*!
+    Тип: вычисление
+    Функция по созданию копии Article с обновлёнными данными
+    Оперирует: строение Article
+     */
+    private fun createCopyOfArticle(
+        article: Article,
+        newName: String = article.nameArt,
+        creationParams: ArticleCreationParams = ArticleCreationParams(article.censorAge, article.formArt, article.genre),
+        annotation: String = article.annotation,
+        login: String = article.user,
+        tags: List<Int> = article.tagsArt,
+        chapters: List<Int> = article.chapters
+    ): Article {
+        return article.copy(
             nameArt = newName,
             censorAge = creationParams.age,
             formArt = creationParams.form,
@@ -191,7 +223,6 @@ class ArticleStorage(articles: List<Article>) {
             tagsArt = tags,
             chapters = chapters
         )
-        return addArticleToStorage(updatedArticle)
     }
 
     /*!
@@ -200,7 +231,7 @@ class ArticleStorage(articles: List<Article>) {
     Является обёрткой для addValueToMap()
     Оперирует: ?
      */
-    fun addArticleAndGetStorage(article: Article, storage: Map<Int, Article>) =
+    private fun addArticleAndGetStorage(article: Article, storage: Map<Int, Article>) =
         addValueToMap(article.id, article, storage)
 
     /*!
@@ -223,21 +254,5 @@ class ArticleStorage(articles: List<Article>) {
         articles: List<Article>,
     ): List<Article> {
         return valuesByPage(pageNumber, articles)
-    }
-
-    /*!
-    Тип: вычисление
-    Функция по добавлению списка тэгов и глав в предложенный объект Article
-    Оперирует: строение Article
-     */
-    fun addTagsAndChaptersToArticle(
-        articleToDo: Article,
-        tags: List<Int>,
-        chapters: List<Int>,
-    ): Article {
-        return articleToDo.copy(
-            tagsArt = tags,
-            chapters = chapters
-        )
     }
 }
